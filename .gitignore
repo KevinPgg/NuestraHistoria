@@ -1,74 +1,36 @@
-Archivo de ignorar para proyectos web / Vanilla JS
+# Dependencias y builds
+node_modules/
+package-lock.json
+dist/
+build/
+tmp/
 
-----------------------------------------------------------------------
+# Python
+.venv/
+__pycache__/
+*.pyc
 
-1. Dependencias y compilación (si usas npm o herramientas de build)
-
-----------------------------------------------------------------------
-
-Dependencias de Node
-
-/node_modules
-/package-lock.json
-
-Archivos de build y temporales
-
-/dist
-/build
-/tmp
-
-----------------------------------------------------------------------
-
-2. Carpetas y archivos de IDEs y Sistemas Operativos
-
-----------------------------------------------------------------------
-
-Exclusión de Visual Studio y Visual Studio Code (VS Code)
-
+# IDEs
 .vscode/
-.vs/                   # <-- Específicamente la carpeta de Visual Studio
+.vs/
 *.suo
 *.user
 *.pdb
 *.obj
 *.o
 
-Exclusiones de macOS
-
+# OS
 .DS_Store
-
-Exclusiones de Windows
-
 Thumbs.db
 desktop.ini
 
-----------------------------------------------------------------------
-
-3. Datos sensibles y logs
-
-----------------------------------------------------------------------
-
-Archivos de logs
-
-.log
+# Logs y env
+*.log
 npm-debug.log
-
-Configuraciones de entorno (claves, etc.)
-
 .env
 .env.local
 
-----------------------------------------------------------------------
-
-4. Archivos generados
-
-----------------------------------------------------------------------
-
-Si en algún momento generas PDFs o archivos grandes
-
+# Archivos generados
 *.pdf
 *.zip
-
-Archivos de backup del editor de texto
-
 *~

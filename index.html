@@ -74,6 +74,27 @@
                 </div>
             </div>
         </div>
+
+        <!-- MODAL (FOTO) - Oculto por defecto -->
+        <div id="photo-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 transition-opacity duration-300">
+            <div class="photo-modal-card w-full max-w-3xl rounded-2xl relative overflow-hidden bg-white/90 shadow-xl">
+
+                <!-- Botón Cerrar -->
+                <button onclick="closePhotoModal()" class="absolute top-3 right-3 z-10 text-gray-400 hover:text-rose-500 transition-colors">
+                    <i data-lucide="x" class="w-8 h-8"></i>
+                </button>
+
+                <!-- Fecha en esquina -->
+                <span id="photo-modal-date" class="photo-modal-date">Fecha</span>
+
+                <div class="photo-modal-content">
+                    <img id="photo-modal-img" class="photo-modal-img" alt="Foto" />
+                    <div class="photo-modal-desc">
+                        <p id="photo-modal-desc"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </body>
-    <script src="script.js"></script>
+    <script type="module" src="script.js"></script>
 </html>

@@ -1,3 +1,5 @@
+import { loadCardRegistros } from './base/cardRegistros.js';
+
 // Inicializar Iconos al principio
 lucide.createIcons();
 
@@ -60,25 +62,22 @@ const milestones = [
 ];
 
 // ==========================================
-//  AQUÍ EDITAS LAS FOTOS DE LA GALERÍA
+//  GALERÍA DE FOTOS (CARGA DE REGISTROS)
 // ==========================================
-// Asegúrate de crear una carpeta llamada 'img' al lado de este archivo index.html
-// y pon tus fotos ahí. Luego, escribe sus nombres exactos aquí abajo.
-const photoFilenames = [
-    'ale.jpg', 'aleyo.jpg','aleyopanora.jpg',
-    'aleyotop.jpg', 'canela.jpg', 'payaso.jpg', 'yo.jpg', 'ale-alealesita.jpg',
-    'ale-barba.jpg', 'ale-cumple-giftsetup.jpg', 'ale-darkera.jpg',
-    'ale-erahumilde.jpg', 'ale-eresrara.jpg', 'aleyo-beforedanny.jpg',
-    'ale-floresamarillas.jpg', 'ale-leona.jpg', 'ale-policia.jpg', 'ale-waparubia.jpg',
-    'aleyo-caras.jpg', 'aleyo-casares.png', 'aleyo-cochinos2.jpg', 'aleyo-cochinos.jpg',
-    'aleyo-cumpleale-loquitos1.jpg', 'aleyo-cumpleale-loquitos2.jpg', 'aleyo-dannyocean.jpg',
-    'aleyo-gorra.jpg', 'aleyo-gym.jpg', 'aleyo-happymoment1.jpg', 'aleyo-jejeje-mascarilla.jpg',
-    'aleyo-jejeje.jpg', 'aleyo-patos.jpg', 'aleyo-placidez.jpg', 'aleyo-placidez2.jpg',
-    'aleyo-portones.jpg', 'aleyo-promise.jpg', 'aleyo-skincare.jpg', 'alyo-casares-6m-muack.jpg',
-    'alyo-casares-6m.jpg', 'merhaba.jpg', 'provolatta.jpg', 'suchi.jpg', 'yo-cerofetiche.jpg',
-    'yo-corteintento1000.jpg', 'yo-hailhitler.jpg', 'yo-paratisapa2.jpg',
-    'yo-paratisapa.jpg', 'yo-pumplips.jpg'
-];
+const getSnippet = (text, maxWords = 16) => {
+    const words = text.split(/\s+/).filter(Boolean);
+    if (words.length <= maxWords) return words.join(' ');
+    return `${words.slice(0, maxWords).join(' ')}...`;
+};
+
+const formatPhotoDate = (date) => {
+    if (!date) return 'Fecha desconocida';
+    return new Intl.DateTimeFormat('es-ES', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric'
+    }).format(date);
+};
 
 
 // ==========================================
@@ -145,37 +144,66 @@ milestones.forEach((item, index) => {
 
 // --- LÓGICA DE LA GALERÍA DE FOTOS ---
 const galleryContainer = document.getElementById('photo-gallery');
+const photoModal = document.getElementById('photo-modal');
+const photoModalImg = document.getElementById('photo-modal-img');
+const photoModalDesc = document.getElementById('photo-modal-desc');
+const photoModalDate = document.getElementById('photo-modal-date');
 
-photoFilenames.forEach(filename => {
-    const photoContainer = document.createElement('div');
-    photoContainer.className = 'photo-container shadow-sm';
+const openPhotoModal = (card) => {
+    photoModalImg.src = `img/${card.fotoFileName}`;
+    photoModalImg.alt = card.fotoFileName;
+    photoModalDesc.textContent = card.descripcion;
+    photoModalDate.textContent = formatPhotoDate(card.fecha);
+    photoModal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+};
 
-    const img = document.createElement('img');
-    img.src = `img/${filename}`; // Asume que las fotos están en la carpeta 'img'
-    img.alt = filename;
-    img.className = 'photo-img';
+const closePhotoModal = () => {
+    photoModal.classList.add('hidden');
+    document.body.style.overflow = 'auto';
+};
 
-    // Manejador de error: Si la imagen no carga
-    img.onerror = function () {
-        this.style.display = 'none'; // Oculta la etiqueta img rota
-
-        // Crea el contenido de fallback
-        const fallback = document.createElement('div');
-        fallback.className = 'photo-fallback';
-        // Usamos un icono de cámara tachada de Lucide
-        fallback.innerHTML = `
-                    <i data-lucide="camera-off" class="w-8 h-8 mb-2"></i>
-                    <span class="text-xs break-all font-sans">${filename}</span>
-                `;
-        photoContainer.appendChild(fallback);
-
-        // Importante: Re-escanear el DOM para que Lucide renderice el nuevo icono
-        lucide.createIcons();
-    };
-
-    photoContainer.appendChild(img);
-    galleryContainer.appendChild(photoContainer);
+photoModal.addEventListener('click', (e) => {
+    if (e.target === photoModal) closePhotoModal();
 });
+
+const renderGallery = async () => {
+    const cardRegistros = await loadCardRegistros();
+
+    cardRegistros.forEach((card) => {
+        const photoContainer = document.createElement('div');
+        photoContainer.className = 'photo-container shadow-sm';
+
+        const img = document.createElement('img');
+        img.src = `img/${card.fotoFileName}`;
+        img.alt = card.fotoFileName;
+        img.className = 'photo-img';
+
+        const overlay = document.createElement('div');
+        overlay.className = 'photo-overlay';
+        overlay.innerHTML = `<p class="photo-snippet">${getSnippet(card.descripcion)}</p>`;
+
+        img.onerror = function () {
+            this.style.display = 'none';
+
+            const fallback = document.createElement('div');
+            fallback.className = 'photo-fallback';
+            fallback.innerHTML = `
+                    <i data-lucide="camera-off" class="w-8 h-8 mb-2"></i>
+                    <span class="text-xs break-all font-sans">${card.fotoFileName}</span>
+                `;
+            photoContainer.appendChild(fallback);
+            lucide.createIcons();
+        };
+
+        photoContainer.addEventListener('click', () => openPhotoModal(card));
+        photoContainer.appendChild(img);
+        photoContainer.appendChild(overlay);
+        galleryContainer.appendChild(photoContainer);
+    });
+};
+
+renderGallery();
 
 
 // --- FUNCIONES GLOBALES Y EFECTOS ---
@@ -194,6 +222,7 @@ function closeModal() {
     modal.classList.add('hidden');
     document.body.style.overflow = 'auto';
 }
+window.closeModal = closeModal;
 
 modal.addEventListener('click', (e) => {
     if (e.target === modal) closeModal();
@@ -215,5 +244,6 @@ function createFallingElements() {
         setTimeout(() => { el.remove(); }, duration * 1000);
     }, 400);
 }
+window.closePhotoModal = closePhotoModal;
 
 createFallingElements();
