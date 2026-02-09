@@ -203,12 +203,12 @@ const photoData = [
   },
   {
     filename: 'suchi.jpg',
-    descripcion: 'Sushi en noe sushi luego de una sesion de ejercicio dura (no fue lo único que se endureció), unos besos apasionados y full sudor. Un buen merecido sushi, hubo un show con fuego y saque para unos rollos 8/10 debía ser de noche para apreciarse mejor pipipi',
+    descripcion: 'Sushi en noe sushi luego de una sesion de ejercicio dura *(no fue lo único que se endureció)*, unos besos apasionados y full sudor. Un buen merecido sushi, hubo un show con fuego y saque para unos rollos 8/10 debía ser de noche para apreciarse mejor pipipi',
     fecha: '2025-08-24T15:10:12.999297+00:00'
   },
   {
     filename: 'yo-cerofetiche.jpg',
-    descripcion: 'Foto para mi novia que solo me busca por mi esculpido cuerpo, calor natural a hombre y confort de confianza ... censura en las axilas xq alejandrita tiene fetiches :p',
+    descripcion: 'Foto para mi novia que solo me busca por mi esculpido cuerpo, calor natural a hombre y confort de confianza ... *censura en las axilas xq alejandrita tiene fetiches :p*',
     fecha: '2025-11-15T19:55:06.710219+00:00'
   },
   {

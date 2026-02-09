@@ -75,8 +75,62 @@ const formatPhotoDate = (date) => {
     return new Intl.DateTimeFormat('es-ES', {
         day: '2-digit',
         month: 'long',
-        year: 'numeric'
+        year: 'numeric',
+        timeZone: 'UTC'
     }).format(date);
+};
+
+const escapeHtml = (value) => value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+
+const applyCensorship = (text) => {
+    const escaped = escapeHtml(text);
+    return escaped.replace(/\*(.+?)\*/g, (_, content) => (
+        `<span class="censored" tabindex="0">${escapeHtml(content)}</span>`
+    ));
+};
+
+const normalizeDate = (value) => {
+    if (!value) return null;
+    const parsed = value instanceof Date ? value : new Date(value);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+};
+
+const seedFromString = (text) => {
+    let h = 1779033703 ^ text.length;
+    for (let i = 0; i < text.length; i += 1) {
+        h = Math.imul(h ^ text.charCodeAt(i), 3432918353);
+        h = (h << 13) | (h >>> 19);
+    }
+    return () => {
+        h = Math.imul(h ^ (h >>> 16), 2246822507);
+        h = Math.imul(h ^ (h >>> 13), 3266489909);
+        return (h ^= h >>> 16) >>> 0;
+    };
+};
+
+const seededRandom = (seed) => {
+    let t = seed + 0x6d2b79f5;
+    return () => {
+        t = Math.imul(t ^ (t >>> 15), t | 1);
+        t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+};
+
+const shuffleArray = (items, seedText) => {
+    const array = [...items];
+    const seed = seedFromString(seedText)();
+    const random = seededRandom(seed);
+    for (let i = array.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
 };
 
 
@@ -148,12 +202,27 @@ const photoModal = document.getElementById('photo-modal');
 const photoModalImg = document.getElementById('photo-modal-img');
 const photoModalDesc = document.getElementById('photo-modal-desc');
 const photoModalDate = document.getElementById('photo-modal-date');
+const filterToggle = document.getElementById('photo-filter-toggle');
+const filterPanel = document.getElementById('photo-filter-panel');
+const filterButtons = Array.from(document.querySelectorAll('.photo-filter-btn'));
+const filterPopup = document.getElementById('photo-filter-popup');
+const filterTitle = document.getElementById('photo-filter-title');
+const filterClose = document.getElementById('photo-filter-close');
+const filterApply = document.getElementById('photo-filter-apply');
+const filterDayInput = document.getElementById('photo-filter-day');
+const filterWeekInput = document.getElementById('photo-filter-week');
+const filterMonthInput = document.getElementById('photo-filter-month');
+const filterYearInput = document.getElementById('photo-filter-year');
+
+let allCards = [];
+let activeFilter = 'all';
+let selectedFilterValue = null;
 
 const openPhotoModal = (card) => {
     photoModalImg.src = `img/${card.fotoFileName}`;
     photoModalImg.alt = card.fotoFileName;
-    photoModalDesc.textContent = card.descripcion;
-    photoModalDate.textContent = formatPhotoDate(card.fecha);
+    photoModalDesc.innerHTML = applyCensorship(card.descripcion);
+    photoModalDate.textContent = formatPhotoDate(normalizeDate(card.fecha));
     photoModal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
 };
@@ -167,10 +236,73 @@ photoModal.addEventListener('click', (e) => {
     if (e.target === photoModal) closePhotoModal();
 });
 
-const renderGallery = async () => {
-    const cardRegistros = await loadCardRegistros();
+const getRangeForFilter = (type, value) => {
+    if (!value) return null;
 
-    cardRegistros.forEach((card) => {
+    switch (type) {
+        case 'day': {
+            const start = new Date(value);
+            if (Number.isNaN(start.getTime())) return null;
+            const end = new Date(start);
+            start.setUTCHours(0, 0, 0, 0);
+            end.setUTCHours(23, 59, 59, 999);
+            return { start, end };
+        }
+        case 'week': {
+            const [yearStr, weekStr] = value.split('-W');
+            const year = Number(yearStr);
+            const week = Number(weekStr);
+            if (!year || !week) return null;
+            const jan4 = new Date(Date.UTC(year, 0, 4));
+            const jan4Day = (jan4.getUTCDay() + 6) % 7;
+            const weekStart = new Date(jan4);
+            weekStart.setUTCDate(jan4.getUTCDate() - jan4Day + (week - 1) * 7);
+            weekStart.setUTCHours(0, 0, 0, 0);
+            const weekEnd = new Date(weekStart);
+            weekEnd.setUTCDate(weekStart.getUTCDate() + 6);
+            weekEnd.setUTCHours(23, 59, 59, 999);
+            return { start: weekStart, end: weekEnd };
+        }
+        case 'month': {
+            const [yearStr, monthStr] = value.split('-');
+            const year = Number(yearStr);
+            const month = Number(monthStr) - 1;
+            if (!year || month < 0) return null;
+            const monthStart = new Date(Date.UTC(year, month, 1));
+            const monthEnd = new Date(Date.UTC(year, month + 1, 0, 23, 59, 59, 999));
+            return { start: monthStart, end: monthEnd };
+        }
+        case 'year': {
+            const year = Number(value);
+            if (!year) return null;
+            const yearStart = new Date(Date.UTC(year, 0, 1));
+            const yearEnd = new Date(Date.UTC(year, 11, 31, 23, 59, 59, 999));
+            return { start: yearStart, end: yearEnd };
+        }
+        default:
+            return null;
+    }
+};
+
+const matchesFilter = (card) => {
+    if (activeFilter === 'all') return true;
+    const date = normalizeDate(card.fecha);
+    if (!date) return false;
+    const range = getRangeForFilter(activeFilter, selectedFilterValue);
+    if (!range) return false;
+    return date >= range.start && date <= range.end;
+};
+
+const applyFilter = () => {
+    const filtered = activeFilter === 'all'
+        ? allCards
+        : allCards.filter(matchesFilter);
+    renderGallery(filtered);
+};
+
+const renderGallery = (cards) => {
+    galleryContainer.innerHTML = '';
+    cards.forEach((card) => {
         const photoContainer = document.createElement('div');
         photoContainer.className = 'photo-container shadow-sm';
 
@@ -181,7 +313,7 @@ const renderGallery = async () => {
 
         const overlay = document.createElement('div');
         overlay.className = 'photo-overlay';
-        overlay.innerHTML = `<p class="photo-snippet">${getSnippet(card.descripcion)}</p>`;
+        overlay.innerHTML = `<p class="photo-snippet">${applyCensorship(getSnippet(card.descripcion))}</p>`;
 
         img.onerror = function () {
             this.style.display = 'none';
@@ -203,7 +335,102 @@ const renderGallery = async () => {
     });
 };
 
-renderGallery();
+const initGallery = async () => {
+    const cardRegistros = await loadCardRegistros();
+    const seed = new Date().toISOString().split('T')[0];
+    allCards = shuffleArray(cardRegistros, seed);
+    applyFilter();
+};
+
+if (filterToggle && filterPanel) {
+    filterToggle.addEventListener('click', () => {
+        filterPanel.classList.toggle('hidden');
+    });
+}
+
+const showFilterPopup = (type) => {
+    if (!filterPopup) return;
+    const inputs = [filterDayInput, filterWeekInput, filterMonthInput, filterYearInput];
+    inputs.forEach((input) => input.classList.add('hidden'));
+
+    if (type === 'day') {
+        filterTitle.textContent = 'Seleccionar día';
+        filterDayInput.classList.remove('hidden');
+    } else if (type === 'week') {
+        filterTitle.textContent = 'Seleccionar semana';
+        filterWeekInput.classList.remove('hidden');
+    } else if (type === 'month') {
+        filterTitle.textContent = 'Seleccionar mes';
+        filterMonthInput.classList.remove('hidden');
+    } else if (type === 'year') {
+        filterTitle.textContent = 'Seleccionar año';
+        filterYearInput.classList.remove('hidden');
+    }
+
+    filterPopup.classList.remove('hidden');
+};
+
+const hideFilterPopup = () => {
+    if (!filterPopup) return;
+    filterPopup.classList.add('hidden');
+};
+
+if (filterClose) {
+    filterClose.addEventListener('click', hideFilterPopup);
+}
+
+if (filterApply) {
+    filterApply.addEventListener('click', () => {
+        if (activeFilter === 'day') {
+            selectedFilterValue = filterDayInput.value || null;
+        } else if (activeFilter === 'week') {
+            selectedFilterValue = filterWeekInput.value || null;
+        } else if (activeFilter === 'month') {
+            selectedFilterValue = filterMonthInput.value || null;
+        } else if (activeFilter === 'year') {
+            selectedFilterValue = filterYearInput.value || null;
+        }
+        applyFilter();
+        hideFilterPopup();
+    });
+}
+
+filterButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+        filterButtons.forEach((btn) => btn.classList.remove('is-active'));
+        button.classList.add('is-active');
+        activeFilter = button.dataset.filter || 'all';
+        if (activeFilter === 'all') {
+            selectedFilterValue = null;
+            hideFilterPopup();
+            applyFilter();
+            return;
+        }
+
+        showFilterPopup(activeFilter);
+    });
+});
+
+initGallery();
+
+document.addEventListener('click', (event) => {
+    const censored = event.target.closest('.censored');
+    if (censored) {
+        censored.classList.add('censored--revealed');
+        return;
+    }
+
+    document.querySelectorAll('.censored--revealed').forEach((el) => {
+        el.classList.remove('censored--revealed');
+    });
+});
+
+document.addEventListener('focusin', (event) => {
+    if (event.target.classList.contains('censored')) return;
+    document.querySelectorAll('.censored--revealed').forEach((el) => {
+        el.classList.remove('censored--revealed');
+    });
+});
 
 
 // --- FUNCIONES GLOBALES Y EFECTOS ---

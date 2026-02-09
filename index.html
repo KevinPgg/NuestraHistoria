@@ -39,6 +39,34 @@
                 <h2 class="text-3xl font-bold text-center text-rose-600 mb-8" style="font-family: 'Dancing Script', cursive;">
                     Nuestros Recuerdos
                 </h2>
+                <div class="photo-filter-wrap">
+                    <button id="photo-filter-toggle" class="photo-filter-toggle" type="button">
+                        <i data-lucide="sliders" class="w-4 h-4"></i>
+                        <span>Filtrar</span>
+                    </button>
+                    <div id="photo-filter-panel" class="photo-filter-panel hidden">
+                        <button class="photo-filter-btn" data-filter="day" type="button">Día</button>
+                        <button class="photo-filter-btn" data-filter="week" type="button">Semana</button>
+                        <button class="photo-filter-btn" data-filter="month" type="button">Mes</button>
+                        <button class="photo-filter-btn" data-filter="year" type="button">Año</button>
+                        <button class="photo-filter-btn is-reset" data-filter="all" type="button">Todo</button>
+                    </div>
+                    <div id="photo-filter-popup" class="photo-filter-popup hidden">
+                        <div class="photo-filter-popup-head">
+                            <span id="photo-filter-title">Seleccionar</span>
+                            <button id="photo-filter-close" type="button" class="photo-filter-close">✕</button>
+                        </div>
+                        <div class="photo-filter-popup-body">
+                            <input id="photo-filter-day" type="date" class="photo-filter-input hidden" />
+                            <input id="photo-filter-week" type="week" class="photo-filter-input hidden" />
+                            <input id="photo-filter-month" type="month" class="photo-filter-input hidden" />
+                            <input id="photo-filter-year" type="number" min="1900" max="2100" placeholder="2025" class="photo-filter-input hidden" />
+                        </div>
+                        <div class="photo-filter-popup-actions">
+                            <button id="photo-filter-apply" type="button" class="photo-filter-apply">Aplicar</button>
+                        </div>
+                    </div>
+                </div>
                 <div id="photo-gallery" class="photo-grid">
                     <!-- Se llena con Javascript -->
                 </div>
@@ -84,11 +112,14 @@
                     <i data-lucide="x" class="w-8 h-8"></i>
                 </button>
 
-                <!-- Fecha en esquina -->
-                <span id="photo-modal-date" class="photo-modal-date">Fecha</span>
+                <div class="photo-modal-header">
+                    <span id="photo-modal-date" class="photo-modal-date">Fecha</span>
+                </div>
 
                 <div class="photo-modal-content">
-                    <img id="photo-modal-img" class="photo-modal-img" alt="Foto" />
+                    <div class="photo-modal-media">
+                        <img id="photo-modal-img" class="photo-modal-img" alt="Foto" />
+                    </div>
                     <div class="photo-modal-desc">
                         <p id="photo-modal-desc"></p>
                     </div>

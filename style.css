@@ -105,10 +105,12 @@ body {
 }
 
 .photo-container:hover .photo-img {
+    
     transform: scale(1.1); /* Efecto zoom al pasar el mouse */
 }
 
 .photo-container:hover {
+    cursor: pointer;
     transform: translateY(-4px);
     box-shadow: 0 10px 20px rgba(244, 63, 94, 0.15);
 }
@@ -153,10 +155,21 @@ body {
     animation: slideIn 0.35s ease-out forwards;
 }
 
+.photo-modal-header {
+    padding: 1rem 1.5rem 0;
+    display: flex;
+    justify-content: flex-start;
+}
+
 .photo-modal-content {
     display: grid;
     grid-template-columns: 1.2fr 1fr;
     gap: 0;
+}
+
+.photo-modal-media {
+    padding: 1rem 1.5rem 1.5rem;
+    background: #fffafc;
 }
 
 .photo-modal-img {
@@ -164,6 +177,8 @@ body {
     height: 100%;
     max-height: 70vh;
     object-fit: cover;
+    border-radius: 1rem;
+    background: #fff;
 }
 
 .photo-modal-desc {
@@ -175,9 +190,6 @@ body {
 }
 
 .photo-modal-date {
-    position: absolute;
-    top: 1rem;
-    left: 1rem;
     background: rgba(255, 255, 255, 0.9);
     color: #be123c;
     font-weight: 700;
@@ -194,6 +206,10 @@ body {
 
     .photo-modal-img {
         max-height: 50vh;
+    }
+
+    .photo-modal-media {
+        padding: 1rem;
     }
 }
 
@@ -224,8 +240,6 @@ body {
     }
 
     .photo-modal-date {
-        top: 0.75rem;
-        left: 0.75rem;
         font-size: 0.7rem;
     }
 }
@@ -238,6 +252,140 @@ body {
     .photo-modal-desc {
         padding: 1.25rem;
     }
+}
+
+/* --- FILTRO DE FOTOS --- */
+.photo-filter-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+}
+
+.photo-filter-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #fff;
+    color: #be123c;
+    border: 2px solid #fda4af;
+    padding: 0.5rem 1rem;
+    border-radius: 999px;
+    font-weight: 700;
+    box-shadow: 0 8px 18px rgba(244, 63, 94, 0.15);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.photo-filter-toggle:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(244, 63, 94, 0.2);
+}
+
+.photo-filter-panel {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.85);
+    padding: 0.75rem 1rem;
+    border-radius: 1rem;
+    border: 1px solid rgba(244, 63, 94, 0.2);
+    box-shadow: 0 10px 25px rgba(244, 63, 94, 0.1);
+}
+
+.photo-filter-btn {
+    border: 1px solid #fda4af;
+    color: #be123c;
+    padding: 0.4rem 0.9rem;
+    border-radius: 999px;
+    font-weight: 600;
+    background: #fff;
+    transition: all 0.2s ease;
+}
+
+.photo-filter-btn:hover,
+.photo-filter-btn.is-active {
+    background: #ffe4e6;
+    border-color: #fb7185;
+}
+
+.photo-filter-btn.is-reset {
+    color: #6b7280;
+    border-color: #e5e7eb;
+}
+
+.photo-filter-popup {
+    width: min(320px, 90%);
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(244, 63, 94, 0.2);
+    box-shadow: 0 16px 30px rgba(244, 63, 94, 0.18);
+    border-radius: 1rem;
+    padding: 0.9rem 1rem 1rem;
+    text-align: left;
+}
+
+.photo-filter-popup-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 700;
+    color: #be123c;
+    margin-bottom: 0.75rem;
+}
+
+.photo-filter-close {
+    background: transparent;
+    border: none;
+    color: #9f1239;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.photo-filter-popup-body {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.photo-filter-input {
+    width: 100%;
+    border: 1px solid #fda4af;
+    border-radius: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+    color: #374151;
+}
+
+.photo-filter-popup-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 0.75rem;
+}
+
+.photo-filter-apply {
+    background: #fb7185;
+    color: #fff;
+    border: none;
+    padding: 0.45rem 1rem;
+    border-radius: 999px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+/* --- CENSURA --- */
+.censored {
+    display: inline-block;
+    padding: 0 0.15rem;
+    border-radius: 0.35rem;
+    background: rgba(244, 63, 94, 0.12);
+    filter: blur(6px);
+    cursor: pointer;
+    transition: filter 0.2s ease, background 0.2s ease;
+}
+
+.censored--revealed {
+    filter: none;
+    background: rgba(244, 63, 94, 0.08);
 }
 
 @media (hover: none) and (pointer: coarse) {
