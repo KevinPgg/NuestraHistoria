@@ -127,5 +127,36 @@
             </div>
         </div>
     </body>
+
+    <!-- ======================================================== -->
+    <!-- LOCK SCREEN — se oculta automáticamente al responder bien -->
+    <!-- ======================================================== -->
+    <div id="lock-screen" aria-live="polite">
+
+        <!-- Lluvia de fondo también aquí -->
+        <div id="lock-background-effects"></div>
+
+        <div id="lock-card">
+
+            <!-- Icono y título -->
+            <div id="lock-header">
+                <i data-lucide="heart-handshake" id="lock-icon"></i>
+                <h1 id="lock-title">Nuestra Historia</h1>
+                <p id="lock-subtitle">¿Eres tú, mi amor? Demuéstralo 💌</p>
+            </div>
+
+            <!-- Contenedor de pregunta (se reemplaza con animación) -->
+            <div id="lock-question-wrap">
+                <p id="lock-question"></p>
+            </div>
+
+            <!-- Opciones -->
+            <div id="lock-options"></div>
+
+            <!-- Feedback -->
+            <p id="lock-feedback"></p>
+        </div>
+    </div>
+
     <script type="module" src="script.js"></script>
 </html>

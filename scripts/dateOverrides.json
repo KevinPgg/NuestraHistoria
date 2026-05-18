@@ -1,0 +1,6 @@
+{
+  "_instrucciones": "Reemplaza 'YYYY-MM-DD' con la fecha real de cada foto. El script la detectará y tendrá prioridad sobre cualquier otra fuente.",
+  "_ejemplo": "aleyo-portones.jpg: '2025-07-12'  o  '2025-07-12T20:30:00+00:00'",
+
+  "": "← Agrega aquí tus fotos con fecha incorrecta, o espera a que el script las detecte automáticamente"
+}

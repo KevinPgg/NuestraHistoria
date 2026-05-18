@@ -1,4 +1,130 @@
 import { loadCardRegistros } from './base/cardRegistros.js';
+import { questions }        from './base/questions.js';
+
+// ==========================================
+//  LOCK SCREEN — Control de acceso
+// ==========================================
+
+(function initLockScreen() {
+    const lockScreen  = document.getElementById('lock-screen');
+
+    // Lluvia también en el lock
+    startFallingElements('lock-background-effects');
+
+    const questionEl   = document.getElementById('lock-question');
+    const questionWrap = document.getElementById('lock-question-wrap');
+    const optionsEl    = document.getElementById('lock-options');
+    const feedbackEl   = document.getElementById('lock-feedback');
+
+    let currentIndex = -1;
+
+    const shuffleOptions = (opts) => {
+        const arr = [...opts];
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    };
+
+    const pickIndex = () => {
+        if (questions.length === 1) return 0;
+        let idx;
+        do { idx = Math.floor(Math.random() * questions.length); }
+        while (idx === currentIndex);
+        return idx;
+    };
+
+    const showQuestion = () => {
+        currentIndex = pickIndex();
+        const q = questions[currentIndex];
+
+        questionWrap.style.opacity = '0';
+        optionsEl.style.opacity    = '0';
+        feedbackEl.textContent     = '';
+        feedbackEl.className       = '';
+
+        setTimeout(() => {
+            questionEl.textContent = q.pregunta;
+            questionWrap.classList.remove('question-enter');
+            void questionWrap.offsetWidth;
+            questionWrap.classList.add('question-enter');
+            questionWrap.style.opacity = '1';
+
+            optionsEl.innerHTML = '';
+            shuffleOptions(q.opciones).forEach((opt) => {
+                const btn = document.createElement('button');
+                btn.className   = 'lock-option';
+                btn.textContent = opt;
+                btn.type        = 'button';
+                btn.addEventListener('click', () => handleAnswer(btn, opt, q.correcta));
+                optionsEl.appendChild(btn);
+            });
+
+            optionsEl.style.opacity = '1';
+            lucide.createIcons();
+        }, 200);
+    };
+
+    const handleAnswer = (btn, chosen, correcta) => {
+        optionsEl.querySelectorAll('.lock-option').forEach(b => {
+            b.disabled = true;
+            b.style.cursor = 'default';
+        });
+
+        if (chosen === correcta) {
+            btn.classList.add('is-correct');
+            feedbackEl.textContent = '¡Correcto! Bienvenida mi amor 💖';
+            feedbackEl.className   = 'fb-correct';
+
+            setTimeout(() => {
+                lockScreen.classList.add('lock-exit');
+                startFallingElements('background-effects');
+                setTimeout(() => lockScreen.classList.add('lock-hidden'), 650);
+            }, 900);
+        } else {
+            btn.classList.add('is-wrong');
+
+            const messages = [
+                '¡Eso no es! Prueba con otra 😏',
+                'Mmm… ¿segura? Intenta de nuevo 🤔',
+                '¡Casi! (mentira). Otra pregunta va 😂',
+                'El amor es difícil pero tú puedes 💪',
+                'Sospechoso... ¿o no eres Ale? 🐀',
+            ];
+            const tries = parseInt(lockScreen.dataset.tries || '0', 10);
+            feedbackEl.textContent = messages[Math.min(tries, messages.length - 1)];
+            feedbackEl.className   = 'fb-wrong';
+            lockScreen.dataset.tries = tries + 1;
+
+            setTimeout(showQuestion, 1400);
+        }
+    };
+
+    showQuestion();
+})();
+
+// ==========================================
+//  Lluvia de emojis — usada en lock Y en main
+// ==========================================
+
+function startFallingElements(containerId) {
+    const container = document.getElementById(containerId);
+    if (!container || container.dataset.started) return;
+    container.dataset.started = '1';
+    const symbols = ['❤️', '💖', '💌', '💕', '📸', '✨'];
+    setInterval(() => {
+        const el = document.createElement('div');
+        el.classList.add('falling-item');
+        el.innerText = symbols[Math.floor(Math.random() * symbols.length)];
+        el.style.left = Math.random() * 100 + 'vw';
+        const duration = Math.random() * 3 + 4;
+        el.style.animationDuration = duration + 's';
+        el.style.fontSize = (Math.random() * 20 + 15) + 'px';
+        container.appendChild(el);
+        setTimeout(() => el.remove(), duration * 1000);
+    }, 400);
+}
 
 // Inicializar Iconos al principio
 lucide.createIcons();
@@ -300,6 +426,15 @@ const applyFilter = () => {
     renderGallery(filtered);
 };
 
+const formatPhotoBadgeDate = (date) => {
+    if (!date) return null;
+    return new Intl.DateTimeFormat('es-ES', {
+        month: 'short',
+        year: 'numeric',
+        timeZone: 'UTC',
+    }).format(date);
+};
+
 const renderGallery = (cards) => {
     galleryContainer.innerHTML = '';
     cards.forEach((card) => {
@@ -314,6 +449,14 @@ const renderGallery = (cards) => {
         const overlay = document.createElement('div');
         overlay.className = 'photo-overlay';
         overlay.innerHTML = `<p class="photo-snippet">${applyCensorship(getSnippet(card.descripcion))}</p>`;
+
+        const cardDate = normalizeDate(card.fecha);
+        if (cardDate) {
+            const badge = document.createElement('span');
+            badge.className = 'photo-date-badge';
+            badge.textContent = formatPhotoBadgeDate(cardDate);
+            photoContainer.appendChild(badge);
+        }
 
         img.onerror = function () {
             this.style.display = 'none';
@@ -455,22 +598,4 @@ modal.addEventListener('click', (e) => {
     if (e.target === modal) closeModal();
 });
 
-function createFallingElements() {
-    const container = document.getElementById('background-effects');
-    const symbols = ['❤️', '💖', '💌', '💕', '📸', '✨'];
-
-    setInterval(() => {
-        const el = document.createElement('div');
-        el.classList.add('falling-item');
-        el.innerText = symbols[Math.floor(Math.random() * symbols.length)];
-        el.style.left = Math.random() * 100 + 'vw';
-        const duration = Math.random() * 3 + 4;
-        el.style.animationDuration = duration + 's';
-        el.style.fontSize = (Math.random() * 20 + 15) + 'px';
-        container.appendChild(el);
-        setTimeout(() => { el.remove(); }, duration * 1000);
-    }, 400);
-}
 window.closePhotoModal = closePhotoModal;
-
-createFallingElements();

@@ -88,7 +88,7 @@ const photoData = [
   },
   {
     filename: 'ale-waparubia.jpg',
-    descripcion: 'Alejandra saliendo de algún sitio quien sabe donde pero está linda ñam te como toda',     
+    descripcion: 'Alejandra saliendo de algún sitio quien sabe donde pero está linda *ñam te como toda. amor te me haces muy sexi en esa foto. Todo me palpita*',     
     fecha: '2025-11-16T21:22:33.404191+00:00'
   },
   {
@@ -143,7 +143,7 @@ const photoData = [
   },
   {
     filename: 'aleyo-jejeje-mascarilla.jpg',
-    descripcion: 'AirBnb para pasar el rato guiño* guiño* 🫦🔥, anyways mascarilla humectante y baño bonito  👌',
+    descripcion: 'AirBnb para pasar el rato *guiño guiño 🫦🔥*, anyways mascarilla humectante y baño bonito  👌',
     fecha: '2025-10-11T13:27:20.291860+00:00'
   },
   {
