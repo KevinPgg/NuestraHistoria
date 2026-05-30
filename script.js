@@ -76,7 +76,7 @@ const _fallingIntervals = {};
             b.style.cursor = 'default';
         });
 
-        if (chosen === correcta) {
+        if (chosen == correcta) {
             btn.classList.add('is-correct');
             feedbackEl.textContent = '¡Correcto! Bienvenida mi amor 💖';
             feedbackEl.className   = 'fb-correct';

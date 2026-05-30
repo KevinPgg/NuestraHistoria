@@ -40,7 +40,7 @@ export const questions = [
     {
         pregunta: '¿De que trató nuestra primera pelea fuerte?',
         opciones: ['K: Me olvidé su cumpleaños', 'K: No le respondí en todo el día', 'A: Cumpleaños en una disco de sambo', 'K: Le grité a copito'],
-        correcta: 'Cumpleaños en una disco de sambo'
+        correcta: 'A: Cumpleaños en una disco de sambo'
     },
     {
         pregunta: '¿Dónde celebramos nuestros 6 meses?',
@@ -59,13 +59,13 @@ export const questions = [
     },
     {
         pregunta: '¿Que es lo que más le gusta a Kevin de Alejandra?',
-        opciones: ['Sonrisa', 'Pasar tiempo juntos', 'Muslos 🤤', 'Muslos ambos dos 🤤'],
-        correcta: 'Muslos ambos dos 🤤'
+        opciones: ['Sonrisa', 'Pasar tiempo juntos', 'Muslos', 'Muslos ambos dos jeje'],
+        correcta: 'Muslos ambos dos jeje'
     },
     {
         pregunta: '¿Donde tiene Kevin dos pecas como mordida de vampiro?',
-        opciones: ['Hombro', 'Pecho', 'Pilin 🫢', 'Cachete'],
-        correcta: 'Pilin 🫢'
+        opciones: ['Hombro', 'Pecho', 'Pilin', 'Cachete'],
+        correcta: 'Pilin'
     },
     {
         pregunta: '¿Donde tiene Kevin una cicatriz visible del rostro?',
