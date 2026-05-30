@@ -344,8 +344,7 @@ body {
     }
 
     .photo-snippet {
-        font-size: 0.7rem;
-        line-height: 1rem;
+        display: none
     }
 
     .photo-modal-desc {
@@ -567,10 +566,6 @@ body {
 }
 
 @media (hover: none) and (pointer: coarse) {
-    .photo-overlay {
-        opacity: 1;
-    }
-
     .photo-container:hover .photo-img {
         transform: none;
     }
