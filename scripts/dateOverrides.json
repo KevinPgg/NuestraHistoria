@@ -1,6 +1,27 @@
 {
   "_instrucciones": "Reemplaza 'YYYY-MM-DD' con la fecha real de cada foto. El script la detectará y tendrá prioridad sobre cualquier otra fuente.",
   "_ejemplo": "aleyo-portones.jpg: '2025-07-12'  o  '2025-07-12T20:30:00+00:00'",
-
-  "": "← Agrega aquí tus fotos con fecha incorrecta, o espera a que el script las detecte automáticamente"
+  "": "← Agrega aquí tus fotos con fecha incorrecta, o espera a que el script las detecte automáticamente",
+  "alemichi.jpg": "2025-05-24",
+  "aleyo-casares.png": "2025-11-30",
+  "aleyo-gym.jpg": "2025-08-22",
+  "aleyo.jpg": "2025-06-29",
+  "aleyotop.jpg": "2025-05-03",
+  "alyo-casares-6m-muack.jpg": "2025-11-30",
+  "alyo-casares-6m.jpg": "2025-11-30",
+  "payaso.jpg": "2025-04-10",
+  "provolatta.jpg": "2025-11-30",
+  "aleyo-casatia1.jpeg": "2026-03-06",
+  "aleyo-comidamexa1.jpeg": "2026-01-31",
+  "aleyo-hailmary1.jpeg": "2026-04-10",
+  "aleyo-hailmary2.jpeg": "2026-04-10",
+  "aleyo-jardinbotanico2.jpeg": "2026-01-31",
+  "aleyo-jaridnbotanico1.jpeg": "2026-01-31",
+  "aleyo-laser1.jpeg": "2026-04-04",
+  "aleyo-lluviachifa.jpeg": "2026-02-20",
+  "aleyo-parquehistorico1.jpeg": "2026-05-02",
+  "aleyo-parquehistorico2.jpeg": "2026-05-02",
+  "aleyo-skincare1.jpeg": "2026-02-01",
+  "aleyo-skincare2.jpeg": "2026-02-01",
+  "yo-presodetuslabiosamor.jpeg": "2026-10-30"
 }

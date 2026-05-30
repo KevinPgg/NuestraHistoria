@@ -30,6 +30,96 @@ body {
     }
 }
 
+/* Iconos SVG que caen: solo decorativos (no interfieren con clics) */
+.falling-icon {
+    pointer-events: none;
+}
+
+/* ===== Botón flotante "Explicación iconos" ===== */
+#icon-explain-btn {
+    position: fixed;
+    bottom: 1.25rem;
+    right: 1.25rem;
+    z-index: 40;
+    width: 3.25rem;
+    height: 3.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    background: #f43f5e;
+    color: #fff;
+    box-shadow: 0 6px 18px rgba(244, 63, 94, 0.45);
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+#icon-explain-btn:hover {
+    transform: scale(1.08);
+    box-shadow: 0 8px 24px rgba(244, 63, 94, 0.6);
+}
+/* Tooltip (solo aparece en dispositivos con hover, p. ej. desktop) */
+@media (hover: hover) {
+    #icon-explain-btn::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        right: 110%;
+        top: 50%;
+        transform: translateY(-50%);
+        white-space: nowrap;
+        background: rgba(31, 41, 55, 0.92);
+        color: #fff;
+        font-size: 0.8rem;
+        padding: 0.35rem 0.6rem;
+        border-radius: 0.4rem;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.15s ease;
+    }
+    #icon-explain-btn:hover::after {
+        opacity: 1;
+    }
+}
+
+/* ===== Galería de iconos en el modal ===== */
+.icon-gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    padding: 1rem 1.5rem 1.75rem;
+}
+@media (min-width: 640px) {
+    .icon-gallery-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+.icon-gallery-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    background: #fffdf5;
+    border: 1px solid #fbcfe8;
+    border-radius: 0.75rem;
+    padding: 0.9rem 0.6rem;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.icon-gallery-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(244, 63, 94, 0.18);
+}
+.icon-gallery-img {
+    width: 64px;
+    height: 64px;
+    object-fit: contain;
+    margin-bottom: 0.6rem;
+}
+.icon-gallery-text {
+    font-family: 'Dancing Script', cursive;
+    font-size: 1.05rem;
+    line-height: 1.3;
+    color: #4b5563;
+}
+
 /* Estilo de la Carta (Modal) */
 .letter-paper {
     background-color: #fffdf5;
@@ -287,7 +377,16 @@ body {
     margin-bottom: 1.25rem;
 }
 
-.photo-filter-toggle {
+/* Fila superior: botones de acción (Filtrar + Momento Random) */
+.photo-filter-controls {
+    display: flex;
+    gap: 0.6rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.photo-filter-toggle,
+.random-photo-btn {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
@@ -299,11 +398,66 @@ body {
     font-weight: 700;
     box-shadow: 0 8px 18px rgba(244, 63, 94, 0.15);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer;
 }
 
-.photo-filter-toggle:hover {
+.photo-filter-toggle:hover,
+.random-photo-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 12px 24px rgba(244, 63, 94, 0.2);
+}
+
+/* Variante visual del botón Random (fondo ligeramente diferente) */
+.random-photo-btn {
+    background: #fff1f2;
+    border-color: #fb7185;
+}
+
+.random-photo-btn:hover {
+    background: #ffe4e6;
+}
+
+/* --- ESTADO VACÍO DE GALERÍA --- */
+.gallery-empty {
+    text-align: center;
+    color: #9ca3af;
+    font-weight: 600;
+    padding: 3rem 1rem;
+    width: 100%;
+    font-size: 1rem;
+}
+
+/* --- BOTÓN "MOSTRAR MÁS" --- */
+.load-more-wrap {
+    display: flex;
+    justify-content: center;
+    margin-top: 1.5rem;
+}
+
+.load-more-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #fff;
+    color: #be123c;
+    border: 2px solid #fda4af;
+    padding: 0.6rem 1.5rem;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    box-shadow: 0 6px 16px rgba(244, 63, 94, 0.15);
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.load-more-btn:hover {
+    background: #ffe4e6;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 22px rgba(244, 63, 94, 0.22);
+}
+
+.load-more-btn:active {
+    transform: translateY(0);
 }
 
 .photo-filter-panel {
@@ -615,4 +769,595 @@ body {
     #lock-title {
         font-size: 1.85rem;
     }
+}
+
+
+/* =========================================================
+   MINIJUEGO TOSTONES
+   ========================================================= */
+
+#tostones-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(4px);
+    animation: tg-fade-in 0.25s ease;
+}
+
+@keyframes tg-fade-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+#tg-box {
+    position: relative;
+    width: min(400px, 96vw);
+    background: rgba(255, 255, 255, 0.97);
+    border: 2px solid #fda4af;
+    border-radius: 1.5rem;
+    padding: 1.5rem 1.25rem 1.25rem;
+    box-shadow: 0 20px 50px rgba(244, 63, 94, 0.25);
+    text-align: center;
+    animation: tg-slide-up 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes tg-slide-up {
+    from { opacity: 0; transform: translateY(30px) scale(0.96); }
+    to   { opacity: 1; transform: translateY(0)    scale(1);    }
+}
+
+#tg-close {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.9rem;
+    background: transparent;
+    border: none;
+    font-size: 1.1rem;
+    color: #9ca3af;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0.2rem 0.4rem;
+    border-radius: 0.4rem;
+    transition: color 0.15s, background 0.15s;
+}
+#tg-close:hover { color: #e11d48; background: #ffe4e6; }
+
+/* ── Header ── */
+
+#tg-title {
+    font-family: 'Dancing Script', cursive;
+    font-size: 1.9rem;
+    font-weight: 600;
+    color: #e11d48;
+    margin: 0 0 0.2rem;
+    line-height: 1.1;
+}
+
+#tg-subtitle {
+    font-size: 0.82rem;
+    color: #6b7280;
+    margin: 0 0 0.6rem;
+}
+
+#tg-score {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #be123c;
+    margin: 0 0 0.75rem;
+}
+
+/* ── Leyenda ── */
+
+#tg-legend {
+    display: flex;
+    justify-content: center;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.9rem;
+}
+
+.tg-leg {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.22rem 0.55rem;
+    border-radius: 999px;
+    border: 1.5px solid transparent;
+    letter-spacing: 0.02em;
+}
+
+/* ── Sartén (pan) ── */
+
+#tg-pan {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    max-height: 240px;
+    background: #1f1f1f;
+    border-radius: 1.2rem;
+    border: 3px solid #111;
+    box-shadow: inset 0 4px 14px rgba(0,0,0,0.6), 0 6px 18px rgba(0,0,0,0.3);
+    overflow: hidden;
+    touch-action: manipulation;
+    user-select: none;
+}
+
+/* Brillo sutil de la sartén */
+#tg-pan::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 30% 30%, rgba(255,255,255,0.06) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+/* ── Tostón (elemento de juego) ── */
+
+.tg-tosston {
+    position: absolute;
+    width: 66px;
+    height: 66px;
+    transform: translate(-50%, -50%);
+    cursor: pointer;
+    touch-action: manipulation;
+    user-select: none;
+    /* Imagen del tostón real con fondo transparente */
+    background-image: url('../iconos-svg/toston.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-color: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    transition: filter 0.22s ease, transform 0.15s ease;
+}
+
+/* Fases de cocción — CSS filter sobre el SVG del tostón */
+
+.tg-raw {
+    /* Crudo: pálido y desaturado (como plátano sin freír) */
+    filter: brightness(1.6) saturate(0.2) drop-shadow(0 3px 5px rgba(0,0,0,0.35));
+}
+
+.tg-cooking {
+    /* Cocinando: color natural del SVG */
+    filter: brightness(1.05) saturate(0.75) drop-shadow(0 3px 6px rgba(0,0,0,0.4));
+}
+
+.tg-golden {
+    /* Dorado — ¡AHORA! Glow ámbar que respeta la forma orgánica */
+    animation: tg-pulse-golden 0.42s ease-in-out infinite alternate;
+    cursor: pointer;
+}
+
+.tg-burnt {
+    /* Quemado: muy oscuro */
+    filter: brightness(0.15) saturate(0.15) drop-shadow(0 3px 5px rgba(0,0,0,0.5));
+    cursor: default;
+    opacity: 0.85;
+}
+
+.tg-done {
+    /* Éxito: brillo verde + escala */
+    filter: brightness(1.25) saturate(1.4) hue-rotate(40deg)
+            drop-shadow(0 0 10px rgba(80,220,80,0.75));
+    transform: translate(-50%, -50%) scale(1.18);
+    pointer-events: none;
+}
+
+/* Pulso golden — drop-shadow sigue la forma del SVG */
+@keyframes tg-pulse-golden {
+    from {
+        filter: brightness(1.0) saturate(1.4)
+                drop-shadow(0 0 5px rgba(255,170,0,0.6))
+                drop-shadow(0 3px 6px rgba(0,0,0,0.4));
+        scale: scale(1.0);
+    }
+    to {
+        filter: brightness(1.2) saturate(1.9)
+                drop-shadow(0 0 16px rgba(255,200,0,1.0))
+                drop-shadow(0 0 6px rgba(255,130,0,0.8));
+        scale: scale(1.11);
+    }
+}
+
+/* Tap incorrecto — rebote */
+.tg-wrong-tap {
+    animation: tg-shake 0.28s ease !important;
+}
+
+@keyframes tg-shake {
+    0%   { transform: translate(-50%, -50%) rotate(0deg); }
+    25%  { transform: translate(-50%, -50%) rotate(-12deg); }
+    75%  { transform: translate(-50%, -50%) rotate(12deg); }
+    100% { transform: translate(-50%, -50%) rotate(0deg); }
+}
+
+/* Emoji que aparece al tocar correctamente */
+.tg-emoji-pop {
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #16a34a;
+    animation: tg-pop 0.38s ease forwards;
+    pointer-events: none;
+}
+
+@keyframes tg-pop {
+    from { opacity: 1; transform: translateX(-50%) translateY(0) scale(0.8); }
+    to   { opacity: 0; transform: translateX(-50%) translateY(-22px) scale(1.3); }
+}
+
+/* Colores de la leyenda */
+.tg-leg.tg-raw     { background: #F0DEB8; border-color: #D4B896; color: #6b4c1a; }
+.tg-leg.tg-cooking { background: #EAB830; border-color: #C49420; color: #5c3d00; }
+.tg-leg.tg-golden  { background: #E07A00; border-color: #C06000; color: #fff; }
+.tg-leg.tg-burnt   { background: #3D1800; border-color: #1E0A00; color: #f5c7a0; }
+
+/* ── Resultado ── */
+
+#tg-result {
+    margin-top: 0.85rem;
+}
+
+.tg-result-text {
+    font-size: 1.15rem;
+    font-weight: 700;
+    padding: 0.7rem 1rem;
+    border-radius: 0.85rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.tg-result-text span {
+    font-size: 0.78rem;
+    font-weight: 500;
+    opacity: 0.85;
+}
+
+.tg-win  { background: #dcfce7; color: #166534; }
+.tg-lose { background: #ffe4e6; color: #9f1239; }
+
+/* ── Botones de acción ── */
+
+.tg-action-btn {
+    display: inline-block;
+    margin-top: 0.75rem;
+    background: #e11d48;
+    color: #fff;
+    border: none;
+    border-radius: 999px;
+    padding: 0.6rem 1.6rem;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+    transition: background 0.2s, transform 0.15s;
+}
+
+.tg-action-btn:hover  { background: #be123c; transform: translateY(-2px); }
+.tg-action-btn:active { transform: translateY(0); }
+
+.tg-open-btn {
+    background: #16a34a;
+}
+.tg-open-btn:hover { background: #15803d; }
+
+/* ── Responsive ── */
+
+@media (max-width: 400px) {
+    #tg-title { font-size: 1.55rem; }
+    .tg-tosston { width: 50px; height: 50px; }
+    #tg-legend { gap: 0.3rem; }
+    .tg-leg { font-size: 0.64rem; padding: 0.18rem 0.45rem; }
+}
+
+
+/* =========================================================
+   MINIJUEGO MEMORY CARDS
+   ========================================================= */
+
+#memory-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(4px);
+    animation: tg-fade-in 0.25s ease; /* reutiliza keyframe del tostones */
+}
+
+#mc-box {
+    position: relative;
+    width: min(480px, 98vw);
+    max-height: 94vh;
+    overflow-y: auto;
+    background: rgba(255, 255, 255, 0.97);
+    border: 2px solid #fda4af;
+    border-radius: 1.5rem;
+    padding: 1.25rem 1rem 1rem;
+    box-shadow: 0 20px 50px rgba(244, 63, 94, 0.25);
+    text-align: center;
+    animation: tg-slide-up 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ── Header ── */
+
+#mc-close {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.9rem;
+    background: transparent;
+    border: none;
+    font-size: 1.1rem;
+    color: #9ca3af;
+    cursor: pointer;
+    padding: 0.2rem 0.4rem;
+    border-radius: 0.4rem;
+    transition: color 0.15s, background 0.15s;
+}
+#mc-close:hover { color: #e11d48; background: #ffe4e6; }
+
+#mc-title {
+    font-family: 'Dancing Script', cursive;
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: #e11d48;
+    margin: 0 0 0.15rem;
+    line-height: 1.1;
+}
+
+#mc-subtitle {
+    font-size: 0.8rem;
+    color: #6b7280;
+    margin: 0 0 0.4rem;
+}
+
+#mc-status {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #be123c;
+    margin: 0 0 0.8rem;
+}
+
+/* ── Grid de cartas ── */
+
+#mc-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    width: 100%;
+    margin-bottom: 0.75rem;
+}
+
+/* ── Carta individual ── */
+
+.mc-card {
+    aspect-ratio: 1 / 1;
+    cursor: pointer;
+    perspective: 700px;
+    border-radius: 0.65rem;
+    user-select: none;
+    touch-action: manipulation;
+    /* Animación de aparición al construir el tablero */
+    animation: mc-appear 0.3s ease both;
+}
+
+/* Escalonar la aparición de las cartas */
+.mc-card:nth-child(1)  { animation-delay: 0.02s; }
+.mc-card:nth-child(2)  { animation-delay: 0.04s; }
+.mc-card:nth-child(3)  { animation-delay: 0.06s; }
+.mc-card:nth-child(4)  { animation-delay: 0.08s; }
+.mc-card:nth-child(5)  { animation-delay: 0.10s; }
+.mc-card:nth-child(6)  { animation-delay: 0.12s; }
+.mc-card:nth-child(7)  { animation-delay: 0.14s; }
+.mc-card:nth-child(8)  { animation-delay: 0.16s; }
+.mc-card:nth-child(9)  { animation-delay: 0.18s; }
+.mc-card:nth-child(10) { animation-delay: 0.20s; }
+.mc-card:nth-child(11) { animation-delay: 0.22s; }
+.mc-card:nth-child(12) { animation-delay: 0.24s; }
+.mc-card:nth-child(13) { animation-delay: 0.26s; }
+.mc-card:nth-child(14) { animation-delay: 0.28s; }
+.mc-card:nth-child(15) { animation-delay: 0.30s; }
+.mc-card:nth-child(16) { animation-delay: 0.32s; }
+.mc-card:nth-child(17) { animation-delay: 0.34s; }
+.mc-card:nth-child(18) { animation-delay: 0.36s; }
+.mc-card:nth-child(19) { animation-delay: 0.38s; }
+.mc-card:nth-child(20) { animation-delay: 0.40s; }
+
+@keyframes mc-appear {
+    from { opacity: 0; transform: scale(0.7); }
+    to   { opacity: 1; transform: scale(1); }
+}
+
+/* Contenedor 3D que rota */
+.mc-card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 0.65rem;
+}
+
+/* Cuando está volteada */
+.mc-card.mc-flipped .mc-card-inner,
+.mc-card.mc-matched  .mc-card-inner {
+    transform: rotateY(180deg);
+}
+
+/* Cara y dorso: mismo tamaño, backface oculto */
+.mc-face {
+    position: absolute;
+    inset: 0;
+    border-radius: 0.65rem;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+/* ── Frente (cara tapada) ── */
+.mc-face-front {
+    background: linear-gradient(135deg, #fb7185 0%, #e11d48 60%, #9f1239 100%);
+    border: 2px solid #fda4af;
+    box-shadow: inset 0 1px 3px rgba(255,255,255,0.2);
+}
+
+/* Patrón decorativo sobre el frente */
+.mc-face-front::before {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    border-radius: 0.4rem;
+    border: 1.5px dashed rgba(255,255,255,0.35);
+}
+
+.mc-front-deco {
+    font-size: clamp(1rem, 4vw, 1.6rem);
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2));
+    position: relative;
+    z-index: 1;
+}
+
+/* ── Dorso (cara con el icono) ── */
+.mc-face-back {
+    background: #fff;
+    border: 2px solid #fda4af;
+    transform: rotateY(180deg);
+    /* padding se define por tipo: svg = 14%, photo = 0 */
+}
+
+.mc-icon-img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    pointer-events: none;
+    user-select: none;
+    border-radius: 0.4rem;
+}
+
+/* SVG: con padding para que respire */
+.mc-card[data-type="svg"] .mc-face-back {
+    padding: 14%;
+}
+.mc-card[data-type="svg"] .mc-icon-img {
+    object-fit: contain;
+}
+
+/* Foto: recortar para llenar toda la cara */
+.mc-card[data-type="photo"] .mc-face-back {
+    padding: 0;
+    overflow: hidden;
+}
+.mc-card[data-type="photo"] .mc-icon-img {
+    object-fit: cover;
+    border-radius: 0.5rem;
+}
+
+/* Estado de carga */
+.mc-loading {
+    grid-column: 1 / -1;
+    text-align: center;
+    color: #be123c;
+    font-weight: 700;
+    font-size: 0.9rem;
+    padding: 2rem 0;
+    animation: tg-fade-in 0.3s ease;
+}
+
+/* ── Par encontrado ── */
+.mc-card.mc-matched .mc-face-back {
+    background: #f0fdf4;
+    border-color: #86efac;
+}
+
+.mc-card.mc-matched {
+    cursor: default;
+}
+
+.mc-card.mc-matched .mc-card-inner {
+    filter: drop-shadow(0 0 6px rgba(74, 222, 128, 0.55));
+}
+
+/* ── Resultado ── */
+
+#mc-result {
+    margin-bottom: 0.5rem;
+}
+
+.mc-result-text {
+    font-size: 1.1rem;
+    font-weight: 700;
+    padding: 0.65rem 1rem;
+    border-radius: 0.85rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.mc-result-text span {
+    font-size: 0.76rem;
+    font-weight: 500;
+    opacity: 0.85;
+}
+
+.mc-win  { background: #dcfce7; color: #166534; }
+
+/* ── Botones ── */
+
+#mc-actions {
+    display: flex;
+    gap: 0.6rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    padding-top: 0.25rem;
+}
+
+.mc-btn {
+    border: none;
+    border-radius: 999px;
+    padding: 0.55rem 1.4rem;
+    font-size: 0.88rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+    transition: background 0.2s, transform 0.15s;
+}
+.mc-btn:hover  { transform: translateY(-2px); }
+.mc-btn:active { transform: translateY(0); }
+
+.mc-btn-secondary {
+    background: #f3f4f6;
+    color: #374151;
+    border: 1.5px solid #e5e7eb;
+}
+.mc-btn-secondary:hover { background: #e5e7eb; }
+
+.mc-btn-primary {
+    background: #16a34a;
+    color: #fff;
+}
+.mc-btn-primary:hover { background: #15803d; }
+
+/* ── Responsive ── */
+
+@media (max-width: 380px) {
+    #mc-title   { font-size: 1.5rem; }
+    #mc-grid    { gap: 6px; }
+    #mc-box     { padding: 1rem 0.75rem 0.85rem; }
 }

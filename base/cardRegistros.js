@@ -217,6 +217,97 @@ const photoData = [
     fecha: '2025-08-31T18:08:27.456809+00:00'
   },
   {
+    filename: 'aleyo-hailmary1.jpeg',
+    descripcion: 'A: Después de ver Project Hail Mary 👎😭 post chillada , que lindo fue verte sensible jsjsjs no había visto tan cerca ese tú 🫂',
+    fecha: '2026-04-10T00:00:00+00:00'
+  },
+
+  {
+    filename: 'aleyo-hailmary2.jpeg',
+    descripcion: 'Bueno si con esta foto alguien duda de que te amo mi amor entonces están ciegos, y como dice el rocky ... no es suficiente :c',
+    fecha: '2026-04-10T00:00:00+00:00'
+  },
+
+  {
+    filename: 'aleyo-jardinbotanico2.jpeg',
+    descripcion: 'Yo amo la comida y a mi novia, por suerte en esta foto podemos ver que me puedo comer ambas 😍',
+    fecha: '2026-01-31T00:00:00+00:00'
+  },
+
+  {
+    filename: 'aleyo-jaridnbotanico1.jpeg',
+    descripcion: 'Foto todos guapos ante de que nos coma una manada rabiosa de mosquitos',
+    fecha: '2026-01-31T00:00:00+00:00'
+  },
+  {
+    filename: 'aleyo-laser1.jpeg',
+    descripcion: 'A: Parece que alguien está recargándose JAAJ pero es el efecto nomás. Ese día estábamos guapotes',
+    fecha: '2026-04-04T00:00:00+00:00'
+  },
+
+  {
+    filename: 'aleyo-lluviachifa.jpeg',
+    descripcion: 'A: Día épico amore mío después de correr en la lluvia y darnos besitos fue lindisimoooo , Disney momento en mi mente jssjs te amo',
+    fecha: '2026-02-20T00:00:00+00:00'
+  },
+
+  {
+    filename: 'aleyo-parquehistorico1.jpeg',
+    descripcion: 'A: Parque histórico salidita 😛 te ves chinito de sonreír 😍 agarrando lo que te pertenece (o sea yo)😠☝️',
+    fecha: '2026-05-02T00:00:00+00:00'
+  },
+
+  {
+    filename: 'aleyo-parquehistorico2.jpeg',
+    descripcion: 'Foto obligada digo tomada con mucho amor, 1/20 fotos creo jajaja',
+    fecha: '2026-05-02T00:00:00+00:00'
+  },
+  {
+    filename: 'aleyo-skincare1.jpeg',
+    descripcion: 'A: JAJAJA alguien tenía una carita de satisfacción única , creo saber dónde estaba su mano',
+    fecha: '2026-02-01T00:00:00+00:00'
+  },
+  {
+    filename: 'ale-vascalove.jpg',
+    descripcion: 'Alejandra me regaló una torta vasca de cumpleaños 🥺 como no me iba a enamorar',
+    fecha: '2025-11-04T15:18:52.639510+00:00'
+  },
+
+  {
+    filename: 'alemichi.jpg',
+    descripcion: 'Ida al parque de la kenedy, habian full gatitos. Hermoso día donde alejandra se enteró que los gatos tienen personalidad jajaja',
+    fecha: '2025-05-24T00:00:00+00:00'
+  },
+
+  {
+    filename: 'alerojo.jpg',
+    descripcion: 'De rojo de te ves demasiado bien 😳',
+    fecha: '2025-06-02T05:11:46.573258+00:00'
+  },
+
+  {
+    filename: 'aleyo-casatia1.jpeg',
+    descripcion: 'A: Y ese pucheritoooo😭😭😍😍😍 basta me dio un ataque de amor lol',
+    fecha: '2026-03-06T00:00:00+00:00'
+  },
+
+  {
+    filename: 'aleyo-comidamexa1.jpeg',
+    descripcion: 'A: Cumpleaños de Lina la dimos toda amor , me encanta todo contigo y si quisiste bailar (indispensable para mí en una pareja) aparte fuiste mi Barbie JAJAJA Tini Tini Tini muaksss',
+    fecha: '2026-01-31T00:00:00+00:00'
+  },
+    {
+    filename: 'aleyo-skincare2.jpeg',
+    descripcion: 'skincare pero desde el espejo como todo un divo',
+    fecha: '2026-02-01T00:00:00+00:00'
+  },
+
+  {
+    filename: 'yo-presodetuslabiosamor.jpeg',
+    descripcion: 'Aqui luciendo mi corte de reo con un filtro de fuckboy ',
+    fecha: '2026-10-30T00:00:00+00:00'
+  },
+  {
     filename: 'yo-hailhitler.jpg',
     descripcion: 'Foto imitando a los seguidores y al que no debe ser nombrado. ------------------------------------------------------------------------Pista: jabón-----------------------------------------------------',
     fecha: '2025-09-21T00:22:50.479224+00:00'

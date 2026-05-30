@@ -1,9 +1,13 @@
-import { loadCardRegistros } from './base/cardRegistros.js';
-import { questions }        from './base/questions.js';
+import { loadCardRegistros }   from './base/cardRegistros.js';
+import { questions }           from './base/questions.js';
+import { milestones }          from './base/letters.js';
+import { startTostonesGame }   from './base/minijuego-tostones.js';
+import { startMemoryGame }     from './base/minijuego-memory.js';
 
 // ==========================================
 //  LOCK SCREEN — Control de acceso
 // ==========================================
+const _fallingIntervals = {};
 
 (function initLockScreen() {
     const lockScreen  = document.getElementById('lock-screen');
@@ -80,8 +84,8 @@ import { questions }        from './base/questions.js';
             setTimeout(() => {
                 lockScreen.classList.add('lock-exit');
                 startFallingElements('background-effects');
-                setTimeout(() => lockScreen.classList.add('lock-hidden'), 650);
-            }, 900);
+                setTimeout(() => lockScreen.classList.add('lock-hidden'), 1650);
+            }, 1500);
         } else {
             btn.classList.add('is-wrong');
 
@@ -108,23 +112,111 @@ import { questions }        from './base/questions.js';
 //  Lluvia de emojis — usada en lock Y en main
 // ==========================================
 
+// Emojis + iconos SVG conmemorativos (extraídos del PDF, carpeta iconos-svg/)
+const _fallingEmojis = ['💌', '💕', '📸'];
+
+// Cada icono SVG con su mensaje asociado (texto que lo acompañaba en el PDF)
+const _iconMessages = {
+    'ramen':           'Tu era de hacer y comer ramén 🍜',
+    'cafe':            'Amamos el café ☕',
+    'bola-billar-8':   'Jugar billar fue increíble 🎱',
+    'corazon':         'Oct/31/2025 — El abrazo más sincero, con “Ojitos lindos de fondo” 🤍',
+    'fuego':           'Chifletones. You & me. Gracias Life porque te conocí ✨',
+    'arbol-navidad':   'We met in December 🎄',
+    'chile':           'Chefsito, tu ají legendario amors 🌶️',
+    'chile-2':         'Amas a Balerina Capuchina 🩰☕',
+    'globo-nieve':     'Amaste el W&T y el acuario. Me encanta que siempre lo mencionas 🐠',
+    'disco':           'No sabía que era Mascarpone before u 🧀',
+    'bitcoin':         'Inviertes en bitcoins, eres la primera persona que escucho que hace eso jsjs ₿',
+    'amanecer':        'El día que nos conocimos en la hacienda, se veía así y sonó “Rayando el sol” 🌅',
+    'persona-poncho':  'Un jalapeño porque le pones últimamente a todo, lol 🌶️',
+    'mosca':           'Si te pudiera volver a conocer lo haría. You are my sunshine, Kevin ☀️',
+    'calendario-31':   'El día que me pediste ser novios, ya estabas demorando jsjsj 📅',
+    'notas-musicales': 'Tu y tu falta de ritmo amor. Cantaste súper tierno, muy en mi cumple. Me enamoré más ese día 🎵',
+};
+const _fallingIcons = Object.keys(_iconMessages);
+
+// Cache de Blob URLs: cada SVG se descarga una sola vez
+const _svgCache = {};
+
+async function preloadIcons() {
+    await Promise.all(
+        _fallingIcons.map(async (key) => {
+            try {
+                const res  = await fetch(`iconos-svg/${key}.svg`);
+                const blob = await res.blob();
+                _svgCache[key] = URL.createObjectURL(blob);
+            } catch (e) {
+                // Si falla, startFallingElements usará la ruta directa como fallback
+                console.warn(`No se pudo precargar el icono: ${key}`, e);
+            }
+        })
+    );
+}
+
+// Iniciar la precarga lo antes posible (no bloquea el hilo principal)
+preloadIcons();
+
 function startFallingElements(containerId) {
     const container = document.getElementById(containerId);
-    if (!container || container.dataset.started) return;
-    container.dataset.started = '1';
-    const symbols = ['❤️', '💖', '💌', '💕', '📸', '✨'];
-    setInterval(() => {
+    if (!container || _fallingIntervals[containerId]) return;
+
+    _fallingIntervals[containerId] = setInterval(() => {
         const el = document.createElement('div');
         el.classList.add('falling-item');
-        el.innerText = symbols[Math.floor(Math.random() * symbols.length)];
+
+        // ~40% de probabilidad de que caiga un icono SVG, si no un emoji
+        if (Math.random() < 0.4) {
+            const key = _fallingIcons[Math.floor(Math.random() * _fallingIcons.length)];
+            const img = document.createElement('img');
+            img.src = _svgCache[key] ?? `iconos-svg/${key}.svg`;
+            img.alt = '';
+            img.classList.add('falling-icon'); // solo decorativo
+            const size = Math.random() * 25 + 25; // 25–50px
+            img.style.width = size + 'px';
+            img.style.height = 'auto';
+            el.appendChild(img);
+        } else {
+            el.innerText = _fallingEmojis[Math.floor(Math.random() * _fallingEmojis.length)];
+            el.style.fontSize = (Math.random() * 20 + 15) + 'px';
+        }
+
         el.style.left = Math.random() * 100 + 'vw';
         const duration = Math.random() * 3 + 4;
         el.style.animationDuration = duration + 's';
-        el.style.fontSize = (Math.random() * 20 + 15) + 'px';
         container.appendChild(el);
         setTimeout(() => el.remove(), duration * 1000);
     }, 400);
 }
+
+// ==========================================
+//  Modal "Explicación iconos" — galería en cuadrícula
+// ==========================================
+function _buildIconGallery() {
+    const grid = document.getElementById('icon-gallery-grid');
+    if (!grid || grid.childElementCount) return; // construir una sola vez
+    for (const key of _fallingIcons) {
+        const card = document.createElement('div');
+        card.className = 'icon-gallery-card';
+        card.innerHTML =
+            `<img src="iconos-svg/${key}.svg" alt="" class="icon-gallery-img" />` +
+            `<p class="icon-gallery-text">${_iconMessages[key]}</p>`;
+        grid.appendChild(card);
+    }
+}
+function openIconModal() {
+    const modal = document.getElementById('icon-modal');
+    if (!modal) return;
+    _buildIconGallery();
+    modal.classList.remove('hidden');
+}
+function closeIconModal() {
+    const modal = document.getElementById('icon-modal');
+    if (modal) modal.classList.add('hidden');
+}
+// script.js es un ES Module: exponer al ámbito global para los onclick del HTML
+window.openIconModal  = openIconModal;
+window.closeIconModal = closeIconModal;
 
 // Inicializar Iconos al principio
 lucide.createIcons();
@@ -137,55 +229,7 @@ lucide.createIcons();
 // Formato: Año, Mes (0 = Enero, 5 = Junio), Día
 const startDate = new Date(2025, 4, 30,12,0,0);
 
-// 2. LAS CARTAS Y HITOS
-const milestones = [
-    {
-        monthsReq: 6,
-        label: '0.6',
-        title: 'Nuestros primeros 6 meses',
-        content: `Parece que fue ayer,<br><br>Parece que fue ayer cuando paseamos todo el puerto santa como 3 veces,
-                    parece que fue ayer cuando cocinamos por primera vez,
-                    parece que fue ayer cuando nos dimos nuestro primer beso apasionado,
-                    parece que fue ayer cuando conoci a parte de tu linda familia,
-                    parece que fue ayer cuando comencé a enamorarme de tí,
-                    parece que fue ayer que nos descubrieramos el uno al otro.
-                    amor mío parece que fue ayer que te amo más y más, parece que fue ayer cuando no sabía cuanto te amaría mañana.
-                    Gracias por todo Alejandra Navia, eres una mujer muy linda e intersante, me encanta tu cuerpo, me encanta tu alma,
-                    me encanta tu manera de ser y tu lindura, me encantan tus valores y que reflexiones sin tapujo sobre cosas de importancia,
-                    me encanta como al principio decías que no sueles hablar de cosas intimas con nadie pero conmigo fue tan fácil,
-                    me encantas tú y solo tú, te adoro mi cachetona/sapa/rata/ratita/chiquistriquis/, hermosa, linda, preciosa, novia mía.`
-    },
-    {
-        monthsReq: 12,
-        label: '1.0',
-        title: '¡Un Año Juntos!',
-        content: `Feliz primer aniversario...`
-    },
-    {
-        monthsReq: 18,
-        label: '1.6',
-        title: 'Año y medio',
-        content: `Seguimos sumando momentos...`
-    },
-    {
-        monthsReq: 24,
-        label: '2.0',
-        title: 'Dos Años',
-        content: `Dos años de aventuras...`
-    },
-    {
-        monthsReq: 36,
-        label: '3.0',
-        title: 'Tres Años Mágicos',
-        content: `Tres años. Wow...`
-    },
-    {
-        monthsReq: 9999,
-        label: '∞',
-        title: 'Hacia el infinito',
-        content: `Y esto apenas comienza...`
-    }
-];
+// 2. LAS CARTAS Y HITOS — importadas desde base/letters.js
 
 // ==========================================
 //  GALERÍA DE FOTOS (CARGA DE REGISTROS)
@@ -311,7 +355,17 @@ milestones.forEach((item, index) => {
             `;
 
     if (isUnlocked) {
-        card.onclick = () => openModal(item);
+        card.onclick = () => {
+            if (item.monthsReq === 6) {
+                // Carta de 6 meses → Memory Cards
+                startTostonesGame(() => openModal(item));
+            } else if (item.monthsReq === 12) {
+                // Carta de 12 meses → Minijuego tostones
+                startMemoryGame(() => openModal(item));
+            } else {
+                openModal(item);
+            }
+        };
     } else {
         card.onclick = () => {
             card.classList.add('animate-pulse');
@@ -323,25 +377,33 @@ milestones.forEach((item, index) => {
 });
 
 // --- LÓGICA DE LA GALERÍA DE FOTOS ---
-const galleryContainer = document.getElementById('photo-gallery');
-const photoModal = document.getElementById('photo-modal');
-const photoModalImg = document.getElementById('photo-modal-img');
-const photoModalDesc = document.getElementById('photo-modal-desc');
-const photoModalDate = document.getElementById('photo-modal-date');
-const filterToggle = document.getElementById('photo-filter-toggle');
-const filterPanel = document.getElementById('photo-filter-panel');
-const filterButtons = Array.from(document.querySelectorAll('.photo-filter-btn'));
-const filterPopup = document.getElementById('photo-filter-popup');
-const filterTitle = document.getElementById('photo-filter-title');
-const filterClose = document.getElementById('photo-filter-close');
-const filterApply = document.getElementById('photo-filter-apply');
-const filterDayInput = document.getElementById('photo-filter-day');
-const filterWeekInput = document.getElementById('photo-filter-week');
-const filterMonthInput = document.getElementById('photo-filter-month');
-const filterYearInput = document.getElementById('photo-filter-year');
+const galleryContainer  = document.getElementById('photo-gallery');
+const galleryEmpty      = document.getElementById('gallery-empty');
+const loadMoreWrap      = document.getElementById('load-more-wrap');
+const loadMoreBtn       = document.getElementById('load-more-btn');
+const randomPhotoBtn    = document.getElementById('random-photo-btn');
+const photoModal        = document.getElementById('photo-modal');
+const photoModalImg     = document.getElementById('photo-modal-img');
+const photoModalDesc    = document.getElementById('photo-modal-desc');
+const photoModalDate    = document.getElementById('photo-modal-date');
+const filterToggle      = document.getElementById('photo-filter-toggle');
+const filterPanel       = document.getElementById('photo-filter-panel');
+const filterButtons     = Array.from(document.querySelectorAll('.photo-filter-btn'));
+const filterPopup       = document.getElementById('photo-filter-popup');
+const filterTitle       = document.getElementById('photo-filter-title');
+const filterClose       = document.getElementById('photo-filter-close');
+const filterApply       = document.getElementById('photo-filter-apply');
+const filterDayInput    = document.getElementById('photo-filter-day');
+const filterWeekInput   = document.getElementById('photo-filter-week');
+const filterMonthInput  = document.getElementById('photo-filter-month');
+const filterYearInput   = document.getElementById('photo-filter-year');
 
-let allCards = [];
-let activeFilter = 'all';
+// Paginación
+const PAGE_SIZE = 30;
+let currentPage      = 0;
+let allFilteredCards = [];
+let allCards         = [];
+let activeFilter     = 'all';
 let selectedFilterValue = null;
 
 const openPhotoModal = (card) => {
@@ -419,32 +481,17 @@ const matchesFilter = (card) => {
     return date >= range.start && date <= range.end;
 };
 
-const applyFilter = () => {
-    const filtered = activeFilter === 'all'
-        ? allCards
-        : allCards.filter(matchesFilter);
-    renderGallery(filtered);
-};
-
-const formatPhotoBadgeDate = (date) => {
-    if (!date) return null;
-    return new Intl.DateTimeFormat('es-ES', {
-        month: 'short',
-        year: 'numeric',
-        timeZone: 'UTC',
-    }).format(date);
-};
-
-const renderGallery = (cards) => {
-    galleryContainer.innerHTML = '';
+// Render de un lote de cards (append, no reemplaza)
+const renderBatch = (cards) => {
     cards.forEach((card) => {
         const photoContainer = document.createElement('div');
         photoContainer.className = 'photo-container shadow-sm';
 
         const img = document.createElement('img');
-        img.src = `img/${card.fotoFileName}`;
-        img.alt = card.fotoFileName;
+        img.src       = `img/${card.fotoFileName}`;
+        img.alt       = card.fotoFileName;
         img.className = 'photo-img';
+        img.loading   = 'lazy'; // lazy loading nativo
 
         const overlay = document.createElement('div');
         overlay.className = 'photo-overlay';
@@ -460,7 +507,6 @@ const renderGallery = (cards) => {
 
         img.onerror = function () {
             this.style.display = 'none';
-
             const fallback = document.createElement('div');
             fallback.className = 'photo-fallback';
             fallback.innerHTML = `
@@ -477,6 +523,64 @@ const renderGallery = (cards) => {
         galleryContainer.appendChild(photoContainer);
     });
 };
+
+const updateLoadMore = () => {
+    const shown = currentPage * PAGE_SIZE;
+    if (shown >= allFilteredCards.length) {
+        loadMoreWrap.classList.add('hidden');
+    } else {
+        const remaining = allFilteredCards.length - shown;
+        loadMoreBtn.textContent = `Mostrar más (${remaining} restantes)`;
+        loadMoreWrap.classList.remove('hidden');
+    }
+};
+
+const loadPage = () => {
+    const start = currentPage * PAGE_SIZE;
+    const batch = allFilteredCards.slice(start, start + PAGE_SIZE);
+    renderBatch(batch);
+    currentPage++;
+    updateLoadMore();
+    lucide.createIcons();
+};
+
+const applyFilter = () => {
+    allFilteredCards = activeFilter === 'all'
+        ? allCards
+        : allCards.filter(matchesFilter);
+
+    currentPage = 0;
+    galleryContainer.innerHTML = '';
+
+    if (allFilteredCards.length === 0) {
+        galleryEmpty.classList.remove('hidden');
+        loadMoreWrap.classList.add('hidden');
+        return;
+    }
+
+    galleryEmpty.classList.add('hidden');
+    loadPage();
+};
+
+const formatPhotoBadgeDate = (date) => {
+    if (!date) return null;
+    return new Intl.DateTimeFormat('es-ES', {
+        month: 'short',
+        year: 'numeric',
+        timeZone: 'UTC',
+    }).format(date);
+};
+
+// Botón "Mostrar más"
+loadMoreBtn.addEventListener('click', loadPage);
+
+// Botón "Momento Random" — elige del pool filtrado actual (Math.random() real, no seeded)
+randomPhotoBtn.addEventListener('click', () => {
+    const pool = allFilteredCards.length > 0 ? allFilteredCards : allCards;
+    if (!pool.length) return;
+    const card = pool[Math.floor(Math.random() * pool.length)];
+    openPhotoModal(card);
+});
 
 const initGallery = async () => {
     const cardRegistros = await loadCardRegistros();

@@ -18,7 +18,6 @@ Prioridad de fechas (de más a menos confiable):
 """
 
 import json
-import os
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -34,20 +33,16 @@ except ImportError:
     print("   Solo se usarán fechas del sistema de archivos.\n")
 
 # ── Rutas ────────────────────────────────────────────────────────────────────
-SCRIPT_DIR   = Path(__file__).parent
-IMG_DIR      = SCRIPT_DIR.parent / "img"
-OUTPUT_JSON  = SCRIPT_DIR.parent / "base" / "photoDates.json"
-OVERRIDES    = SCRIPT_DIR / "dateOverrides.json"
-
-# Si una foto fue copiada más de N días DESPUÉS de su mtime, sospechamos
-# que la fecha de creación no es real.
-SUSPICIOUS_DELTA_DAYS = 30
+SCRIPT_DIR  = Path(__file__).parent
+IMG_DIR     = SCRIPT_DIR.parent / "img"
+OUTPUT_JSON = SCRIPT_DIR.parent / "base" / "photoDates.json"
+OVERRIDES   = SCRIPT_DIR / "dateOverrides.json"
 
 # ── Formatos EXIF ─────────────────────────────────────────────────────────────
 EXIF_DATE_FORMATS = [
-    "%Y:%m:%d %H:%M:%S",   # estándar EXIF
-    "%Y-%m-%d %H:%M:%S",   # variante
-    "%Y/%m/%d %H:%M:%S",   # variante
+    "%Y:%m:%d %H:%M:%S",
+    "%Y-%m-%d %H:%M:%S",
+    "%Y/%m/%d %H:%M:%S",
 ]
 
 SUPPORTED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".heic", ".gif"}
@@ -56,14 +51,12 @@ SUPPORTED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".heic", ".gif"}
 # ── Funciones utilitarias ─────────────────────────────────────────────────────
 
 def to_iso(dt: datetime) -> str:
-    """Convierte datetime a ISO 8601 con timezone UTC."""
     if dt.tzinfo is None:
         dt = dt.replace(tzinfo=timezone.utc)
     return dt.isoformat()
 
 
 def parse_exif_date(value: str) -> datetime | None:
-    """Intenta parsear una cadena de fecha EXIF con múltiples formatos."""
     if not value:
         return None
     value = value.strip()
@@ -76,107 +69,65 @@ def parse_exif_date(value: str) -> datetime | None:
 
 
 def get_exif_dates(img_path: Path) -> dict:
-    """
-    Extrae las fechas relevantes del EXIF de una imagen.
-    Devuelve un dict con claves: original, digitized, modified (o None).
-    """
     result = {"original": None, "digitized": None, "modified": None}
-
     if not PIL_AVAILABLE:
         return result
-
     try:
         with Image.open(img_path) as img:
-            exif_data = img._getexif()  # None si no tiene EXIF
+            exif_data = img._getexif()
             if not exif_data:
                 return result
-
             tag_map = {TAGS.get(k, k): v for k, v in exif_data.items()}
-
             result["original"]  = parse_exif_date(tag_map.get("DateTimeOriginal", ""))
             result["digitized"] = parse_exif_date(tag_map.get("DateTimeDigitized", ""))
             result["modified"]  = parse_exif_date(tag_map.get("DateTime", ""))
     except Exception:
         pass
-
     return result
 
 
 def get_file_dates(img_path: Path) -> dict:
-    """Devuelve fechas de creación y modificación del sistema de archivos."""
-    stat = img_path.stat()
+    stat  = img_path.stat()
     mtime = datetime.fromtimestamp(stat.st_mtime, tz=timezone.utc)
-
-    # En Linux/Mac no hay ctime real de creación — usamos mtime como fallback
     try:
         ctime = datetime.fromtimestamp(stat.st_birthtime, tz=timezone.utc)
     except AttributeError:
         ctime = datetime.fromtimestamp(stat.st_ctime, tz=timezone.utc)
-
     return {"creacion": ctime, "modificacion": mtime}
 
 
 def is_suspicious(file_dates: dict, exif_dates: dict) -> bool:
-    """
-    Retorna True si la fecha de creación del archivo parece ser la del
-    día en que se copió/transfirió, no la foto real.
-
-    Señales de sospecha:
-    - No hay EXIF DateTimeOriginal
-    - La fecha de creación es significativamente MÁS RECIENTE que mtime
-    """
     if exif_dates.get("original"):
-        return False  # Si hay EXIF confiable, no es sospechoso
-
+        return False
     creacion     = file_dates.get("creacion")
     modificacion = file_dates.get("modificacion")
-
     if creacion and modificacion:
-        delta_days = (creacion - modificacion).days
-        if delta_days > SUSPICIOUS_DELTA_DAYS:
+        if creacion.date() == modificacion.date():
             return True
-
     return False
 
 
 def pick_best_date(exif_dates: dict, file_dates: dict, override: str | None) -> tuple[str | None, str]:
-    """
-    Selecciona la mejor fecha disponible y retorna (iso_string, fuente).
-    Fuentes posibles: manual, exif_original, exif_modified, mtime, none
-    """
     if override:
         try:
             dt = datetime.fromisoformat(override)
             return to_iso(dt), "manual"
         except ValueError:
             pass
-
     if exif_dates.get("original"):
         return to_iso(exif_dates["original"]), "exif_original"
-
     if exif_dates.get("digitized"):
         return to_iso(exif_dates["digitized"]), "exif_digitized"
-
     if exif_dates.get("modified"):
         return to_iso(exif_dates["modified"]), "exif_modified"
-
     if file_dates.get("modificacion"):
         return to_iso(file_dates["modificacion"]), "mtime"
-
     return None, "none"
 
 
-# ── Carga de overrides ────────────────────────────────────────────────────────
+# ── Overrides ─────────────────────────────────────────────────────────────────
 
 def load_overrides() -> dict:
-    """
-    Lee dateOverrides.json.
-    Formato esperado:
-    {
-      "aleyo-casares.png": "2025-11-30T21:00:00+00:00",
-      "mifoto.jpg": "2025-08-15"
-    }
-    """
     if not OVERRIDES.exists():
         return {}
     try:
@@ -189,10 +140,6 @@ def load_overrides() -> dict:
 
 
 def save_overrides_template(needs_manual: list[str]):
-    """
-    Guarda / actualiza dateOverrides.json con las fotos que necesitan fecha manual.
-    No sobreescribe entradas ya completadas.
-    """
     existing = {}
     if OVERRIDES.exists():
         try:
@@ -200,12 +147,9 @@ def save_overrides_template(needs_manual: list[str]):
                 existing = json.load(f)
         except Exception:
             pass
-
-    # Agrega nuevas entradas sin sobreescribir las que ya tienen valor
     for filename in needs_manual:
         if filename not in existing or not existing[filename] or existing[filename] == "YYYY-MM-DD":
             existing[filename] = "YYYY-MM-DD"
-
     with open(OVERRIDES, "w", encoding="utf-8") as f:
         json.dump(existing, f, indent=2, ensure_ascii=False)
 
@@ -213,16 +157,12 @@ def save_overrides_template(needs_manual: list[str]):
 # ── Proceso principal ─────────────────────────────────────────────────────────
 
 def process_images() -> tuple[list, list]:
-    """
-    Procesa todas las imágenes en IMG_DIR.
-    Retorna (resultados, lista_de_archivos_sospechosos).
-    """
     if not IMG_DIR.exists():
         print(f"❌  Carpeta de imágenes no encontrada: {IMG_DIR}")
         sys.exit(1)
 
     overrides = load_overrides()
-    results = []
+    results   = []
     suspicious_files = []
 
     image_paths = sorted([
@@ -238,8 +178,8 @@ def process_images() -> tuple[list, list]:
 
     for img_path in image_paths:
         filename = img_path.name
-        exif  = get_exif_dates(img_path)
-        files = get_file_dates(img_path)
+        exif     = get_exif_dates(img_path)
+        files    = get_file_dates(img_path)
         override = overrides.get(filename)
 
         suspicious = is_suspicious(files, exif) and not override
@@ -272,15 +212,35 @@ def process_images() -> tuple[list, list]:
 
 
 def save_output(results: list):
-    """
-    Guarda photoDates.json en el formato que espera cardRegistros.js.
-    Mantiene compatibilidad con los campos fechaCreacion y fechaUltimaModificacion,
-    y añade fechaMejor y source como campos informativos extra.
-    """
     OUTPUT_JSON.parent.mkdir(parents=True, exist_ok=True)
     with open(OUTPUT_JSON, "w", encoding="utf-8") as f:
         json.dump(results, f, indent=2, ensure_ascii=False)
     print(f"\n✅  photoDates.json guardado: {OUTPUT_JSON}")
+
+
+# ── Fotos sin registrar en cardRegistros.js ───────────────────────────────────
+
+def find_unregistered(results: list) -> list:
+    card_registros = SCRIPT_DIR.parent / "base" / "cardRegistros.js"
+    if not card_registros.exists():
+        return []
+    content = card_registros.read_text(encoding="utf-8")
+    return [r for r in results if r["filename"] not in content]
+
+
+def print_missing_entries(unregistered: list):
+    if not unregistered:
+        return
+    print(f"\n⚠️  {len(unregistered)} foto(s) están en img/ pero NO en cardRegistros.js:")
+    print("   Copia cada bloque que necesites en el array photoData[]:\n")
+    for r in unregistered:
+        fecha = r.get("fechaMejor") or r.get("fechaUltimaModificacion") or ""
+        print( "  {")
+        print(f"    filename: '{r['filename']}',")
+        print( "    descripcion: 'Descripción del momento aquí.',")
+        print(f"    fecha: '{fecha}'")
+        print( "  },")
+        print()
 
 
 # ── Entry point ───────────────────────────────────────────────────────────────
@@ -313,6 +273,9 @@ def main():
     print(f"   Con fecha manual       : {sum(1 for r in results if r['source'] == 'manual')}")
     print(f"   Usando mtime           : {sum(1 for r in results if r['source'] == 'mtime')}")
     print(f"   Necesitan revisión     : {len(suspicious)}")
+
+    unregistered = find_unregistered(results)
+    print_missing_entries(unregistered)
 
 
 if __name__ == "__main__":

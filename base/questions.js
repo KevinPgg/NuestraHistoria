@@ -60,17 +60,17 @@ export const questions = [
     {
         pregunta: '¿Que es lo que más le gusta a Kevin de Alejandra?',
         opciones: ['Sonrisa', 'Pasar tiempo juntos', 'Muslos 🤤', 'Muslos ambos dos 🤤'],
-        correcta: 'Kevin'
+        correcta: 'Muslos ambos dos 🤤'
     },
     {
         pregunta: '¿Donde tiene Kevin dos pecas como mordida de vampiro?',
         opciones: ['Hombro', 'Pecho', 'Pilin 🫢', 'Cachete'],
-        correcta: 'Kevin'
+        correcta: 'Pilin 🫢'
     },
     {
         pregunta: '¿Donde tiene Kevin una cicatriz visible del rostro?',
         opciones: ['Frente', 'Orejas', 'Labios', 'Cachete'],
-        correcta: 'Kevin'
+        correcta: 'Labios'
     },
     {
         pregunta: '¿En que mes tuvimos nuestra primera pelea?',

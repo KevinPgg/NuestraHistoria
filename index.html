@@ -8,8 +8,8 @@
         <script src="https://cdn.tailwindcss.com"></script>
         <!-- Fuente bonita para las cartas -->
         <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
-        <!-- Iconos de Lucide (Candados, Corazones, etc) -->
-        <script src="https://unpkg.com/lucide@latest"></script>
+        <!-- Iconos de Lucide (versión fija para evitar breaking changes) -->
+        <script src="https://unpkg.com/lucide@0.383.0/dist/umd/lucide.min.js"></script>
 
         <link rel="stylesheet" href="style.css" />
     </head>
@@ -40,10 +40,16 @@
                     Nuestros Recuerdos
                 </h2>
                 <div class="photo-filter-wrap">
-                    <button id="photo-filter-toggle" class="photo-filter-toggle" type="button">
-                        <i data-lucide="sliders" class="w-4 h-4"></i>
-                        <span>Filtrar</span>
-                    </button>
+                    <div class="photo-filter-controls">
+                        <button id="photo-filter-toggle" class="photo-filter-toggle" type="button">
+                            <i data-lucide="sliders" class="w-4 h-4"></i>
+                            <span>Filtrar</span>
+                        </button>
+                        <button id="random-photo-btn" class="random-photo-btn" type="button">
+                            <i data-lucide="shuffle" class="w-4 h-4"></i>
+                            <span>Momento Random</span>
+                        </button>
+                    </div>
                     <div id="photo-filter-panel" class="photo-filter-panel hidden">
                         <button class="photo-filter-btn" data-filter="day" type="button">Día</button>
                         <button class="photo-filter-btn" data-filter="week" type="button">Semana</button>
@@ -69,6 +75,19 @@
                 </div>
                 <div id="photo-gallery" class="photo-grid">
                     <!-- Se llena con Javascript -->
+                </div>
+
+                <!-- Estado vacío: aparece cuando el filtro no devuelve resultados -->
+                <p id="gallery-empty" class="gallery-empty hidden">
+                    No hay fotos para este período 🌸
+                </p>
+
+                <!-- Paginación: aparece cuando quedan fotos por mostrar -->
+                <div id="load-more-wrap" class="load-more-wrap hidden">
+                    <button id="load-more-btn" class="load-more-btn" type="button">
+                        <i data-lucide="chevrons-down" class="w-4 h-4"></i>
+                        Mostrar más
+                    </button>
                 </div>
             </div>
 
@@ -124,6 +143,26 @@
                         <p id="photo-modal-desc"></p>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- BOTÓN flotante: explicación de iconos -->
+        <button id="icon-explain-btn" onclick="openIconModal()" aria-label="Explicación iconos" data-tooltip="Explicación iconos">
+            <i data-lucide="sparkles" class="w-6 h-6"></i>
+        </button>
+
+        <!-- MODAL (GALERÍA DE ICONOS) - Oculto por defecto -->
+        <div id="icon-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 transition-opacity duration-300" onclick="closeIconModal()">
+            <div class="icon-gallery-card-wrap w-full max-w-2xl rounded-2xl relative bg-white/95 shadow-xl max-h-[90vh] overflow-y-auto modal-enter" onclick="event.stopPropagation()">
+                <button onclick="closeIconModal()" class="absolute top-3 right-3 z-10 text-gray-400 hover:text-rose-500 transition-colors">
+                    <i data-lucide="x" class="w-8 h-8"></i>
+                </button>
+                <div class="text-center pt-8 pb-2 px-6">
+                    <i data-lucide="heart" class="w-8 h-8 text-rose-500 mx-auto fill-current"></i>
+                    <h2 class="text-3xl font-bold text-rose-600 mt-2" style="font-family: 'Dancing Script', cursive;">Nuestros iconos</h2>
+                    <p class="text-sm text-gray-400">Cada uno guarda un recuerdo</p>
+                </div>
+                <div id="icon-gallery-grid" class="icon-gallery-grid"></div>
             </div>
         </div>
     </body>
