@@ -115,12 +115,5 @@ const startDate = new Date(2025, 4, 30, 12, 0, 0);
 // Nota: mes empieza en 0 (Enero=0, Mayo=4, Diciembre=11)
 ```
 
----
 
-## 🌐 GitHub Pages
 
-El sitio se despliega automáticamente desde la rama `main`. Cualquier `git push` actualiza la web en ~1-2 minutos.
-
-URL: `https://KevinPgg.github.io`
-
-> **Importante:** La carpeta `img/` con fotos privadas no debería estar en el repositorio público. Ver `CONTRIBUTING.md` para opciones de privacidad.

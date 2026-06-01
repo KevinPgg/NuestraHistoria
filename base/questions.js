@@ -9,8 +9,8 @@
 export const questions = [
     {
         pregunta: '¿En qué fecha comenzamos nuestra relación?',
-        opciones: ['30 de mayo', '1 de junio', '15 de mayo', '20 de abril'],
-        correcta: '30 de mayo'
+        opciones: ['31 de mayo', '1 de junio', '15 de mayo', '20 de abril'],
+        correcta: '31 de mayo'
     },
     {
         pregunta: '¿Cómo se llama el apodo que Kevin le dice a Ale con más cariño?',

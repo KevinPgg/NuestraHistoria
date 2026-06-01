@@ -18,7 +18,7 @@ const ALL_SVGS = [
     'notas-musicales', 'persona-poncho',
 ];
 
-const TOTAL_PAIRS = 10; // 10 pares → 20 cartas
+const TOTAL_PAIRS = 6; 
 
 // ─────────────────────────────────────────────────
 // Construir pool combinado y elegir 10 al azar
@@ -179,8 +179,8 @@ export function startMemoryGame(onWin) {
         setTimeout(() => {
             resultEl.innerHTML = `
                 <div class="mc-result-text mc-win">
-                    ¡Todos los pares! 🎉
-                    <span>Tu memoria es tan buena como tu sonrisa</span>
+                    Ahora tienes acceso a mi corazón u u
+                    <span>Tu memoria es tan buena como tus .. ejem.</span>
                 </div>`;
             resultEl.classList.remove('hidden');
             openBtn.classList.remove('hidden');
@@ -250,9 +250,9 @@ function _buildModal() {
             <button id="mc-close" aria-label="Cerrar minijuego">✕</button>
 
             <div id="mc-header">
-                <p id="mc-title">🃏 Memory Cards</p>
-                <p id="mc-subtitle">Encuentra los 10 pares para leer la carta</p>
-                <p id="mc-status">0 / 10 pares encontrados</p>
+                <p id="mc-title">🤭 Encuentra a la parejita 🤭</p>
+                <p id="mc-subtitle">Encuentra los 6 pares para leer la carta</p>
+                <p id="mc-status">0 / 6 pares encontrados</p>
             </div>
 
             <div id="mc-grid" aria-label="Tablero de cartas"></div>

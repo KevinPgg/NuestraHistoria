@@ -22,8 +22,10 @@ const PHASE_MS = {
 };
 
 // Posiciones de la grilla 3×3 (% del centro del tosston dentro del pan)
-const GRID_COLS = [16.5, 50, 83.5];
-const GRID_ROWS = [16.5, 50, 83.5];
+// 26/74 → separación 24% × 340px = 81.6px > 80px (sin colisión)
+// esquina más lejana del tosston a ~168px del centro < 170px radio ✓
+const GRID_COLS = [26, 50, 74];
+const GRID_ROWS = [26, 50, 74];
 
 // ─────────────────────────────────────────────────
 export function startTostonesGame(onWin) {
@@ -168,15 +170,15 @@ export function startTostonesGame(onWin) {
         if (win) {
             resultEl.innerHTML = `
                 <div class="tg-result-text tg-win">
-                    ¡Lo lograste! 🎉
-                    <span>Perfectos como tus tostones y tú</span>
+                    Excelente amorcito
+                    <span>Ahora ya puedes freirlos para mí 😏</span>
                 </div>`;
             openBtn.classList.remove('hidden');
         } else {
             resultEl.innerHTML = `
                 <div class="tg-result-text tg-lose">
-                    ¡Casi! 😅
-                    <span>Inténtalo de nuevo, sí puedes</span>
+                    mmmmm quemados como el ivan
+                    <span>De nuevo chef ☝️😠</span>
                 </div>`;
             retryBtn.classList.remove('hidden');
         }
@@ -256,15 +258,15 @@ function _buildModal() {
 
             <div id="tg-header">
                 <p id="tg-title">🍳 Fríe los Tostones</p>
-                <p id="tg-subtitle">Toca cuando estén <strong>dorados</strong> — ni crudos, ni quemados</p>
-                <p id="tg-score">🍳 0 / ${NEED_PERFECT} tostones listos</p>
+                <p id="tg-subtitle">Toca cuando estén <strong>dorados</strong> en el punto 🤌, no quemados en el humo ni crudo de disgusto</p>
+                <p id="tg-score">🍳 0 / ${NEED_PERFECT} tostones pepa</p>
             </div>
 
             <div id="tg-legend" aria-hidden="true">
                 <span class="tg-leg tg-raw">crudo</span>
                 <span class="tg-leg tg-cooking">cocinando</span>
                 <span class="tg-leg tg-golden">¡AHORA!</span>
-                <span class="tg-leg tg-burnt">quemado</span>
+                <span class="tg-leg tg-burnt">ivan</span>
             </div>
 
             <div id="tg-pan" aria-live="polite"></div>

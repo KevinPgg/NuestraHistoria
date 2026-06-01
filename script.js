@@ -78,7 +78,7 @@ const _fallingIntervals = {};
 
         if (chosen == correcta) {
             btn.classList.add('is-correct');
-            feedbackEl.textContent = '¡Correcto! Bienvenida mi amor 💖';
+            feedbackEl.textContent = 'Parece que alguien hizo su tarea 😉 linda mi novia';
             feedbackEl.className   = 'fb-correct';
 
             setTimeout(() => {
@@ -90,11 +90,11 @@ const _fallingIntervals = {};
             btn.classList.add('is-wrong');
 
             const messages = [
-                '¡Eso no es! Prueba con otra 😏',
-                'Mmm… ¿segura? Intenta de nuevo 🤔',
-                '¡Casi! (mentira). Otra pregunta va 😂',
-                'El amor es difícil pero tú puedes 💪',
-                'Sospechoso... ¿o no eres Ale? 🐀',
+                'Equivocada amors Prueba con otra ... la mia?😏',
+                'Otra vez mal? e.e Intenta de nuevo 🤔',
+                'Uy esta si era verdad (mentira) La ultima amor 😾',
+                'Me odias',
+                'No se quien seas pero sape de aquí',
             ];
             const tries = parseInt(lockScreen.dataset.tries || '0', 10);
             feedbackEl.textContent = messages[Math.min(tries, messages.length - 1)];
