@@ -11,9 +11,12 @@
         <!-- Iconos de Lucide (versión fija para evitar breaking changes) -->
         <script src="https://unpkg.com/lucide@0.383.0/dist/umd/lucide.min.js"></script>
 
-        <link rel="stylesheet" href="style.css" />
+        <link rel="stylesheet" href="style.css?v=20260622c" />
     </head>
     <body class="min-h-screen relative text-gray-800">
+
+        <!-- FONDO AMBIENTAL (Golden Hour: bokeh + rayos de luz, solo CSS) -->
+        <div id="ambient-bg"></div>
 
         <!-- FONDO DE LLUVIA -->
         <div id="background-effects"></div>
@@ -45,31 +48,47 @@
                             <i data-lucide="sliders" class="w-4 h-4"></i>
                             <span>Filtrar</span>
                         </button>
+
+                        <div class="photo-sort-wrap">
+                            <button id="photo-sort-btn" class="photo-sort-btn" type="button">
+                                <i data-lucide="arrow-down-up" class="w-4 h-4"></i>
+                                <span id="photo-sort-label">Aleatorio</span>
+                                <i data-lucide="chevron-down" class="w-3 h-3"></i>
+                            </button>
+                            <div id="photo-sort-menu" class="photo-sort-menu hidden">
+                                <button data-sort="random" class="is-active" type="button">Aleatorio</button>
+                                <button data-sort="date-asc" type="button">Fecha ↑ (antiguas)</button>
+                                <button data-sort="date-desc" type="button">Fecha ↓ (recientes)</button>
+                            </div>
+                        </div>
+
                         <button id="random-photo-btn" class="random-photo-btn" type="button">
                             <i data-lucide="shuffle" class="w-4 h-4"></i>
                             <span>Momento Random</span>
                         </button>
                     </div>
+
+                    <!-- Panel de filtros dinámico: solo muestra fechas que existen -->
                     <div id="photo-filter-panel" class="photo-filter-panel hidden">
-                        <button class="photo-filter-btn" data-filter="day" type="button">Día</button>
-                        <button class="photo-filter-btn" data-filter="week" type="button">Semana</button>
-                        <button class="photo-filter-btn" data-filter="month" type="button">Mes</button>
-                        <button class="photo-filter-btn" data-filter="year" type="button">Año</button>
-                        <button class="photo-filter-btn is-reset" data-filter="all" type="button">Todo</button>
-                    </div>
-                    <div id="photo-filter-popup" class="photo-filter-popup hidden">
-                        <div class="photo-filter-popup-head">
-                            <span id="photo-filter-title">Seleccionar</span>
-                            <button id="photo-filter-close" type="button" class="photo-filter-close">✕</button>
+                        <div class="pf-head">
+                            <i data-lucide="calendar-heart" class="w-4 h-4"></i>
+                            <span>Filtrar por fecha</span>
                         </div>
-                        <div class="photo-filter-popup-body">
-                            <input id="photo-filter-day" type="date" class="photo-filter-input hidden" />
-                            <input id="photo-filter-week" type="week" class="photo-filter-input hidden" />
-                            <input id="photo-filter-month" type="month" class="photo-filter-input hidden" />
-                            <input id="photo-filter-year" type="number" min="1900" max="2100" placeholder="2025" class="photo-filter-input hidden" />
+                        <div class="pf-row">
+                            <span class="pf-label">Año</span>
+                            <div id="pf-years" class="pf-chips"></div>
                         </div>
-                        <div class="photo-filter-popup-actions">
-                            <button id="photo-filter-apply" type="button" class="photo-filter-apply">Aplicar</button>
+                        <div id="pf-month-row" class="pf-row hidden">
+                            <span class="pf-label">Mes</span>
+                            <div id="pf-months" class="pf-chips"></div>
+                        </div>
+                        <div id="pf-day-row" class="pf-row hidden">
+                            <span class="pf-label">Día</span>
+                            <div id="pf-days" class="pf-chips"></div>
+                        </div>
+                        <div class="pf-footer">
+                            <span id="pf-count" class="pf-count"></span>
+                            <button id="pf-reset" class="pf-reset" type="button">Mostrar todo</button>
                         </div>
                     </div>
                 </div>
@@ -197,5 +216,5 @@
         </div>
     </div>
 
-    <script type="module" src="script.js"></script>
+    <script type="module" src="script.js?v=20260622c"></script>
 </html>

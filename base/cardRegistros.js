@@ -63,7 +63,7 @@ const photoData = [
   },
   {
     filename: 'ale-eresrara.jpg',
-    descripcion: 'Foto atesorada de mi corazon ... tiene gustos raros pero que se puede hacer la amo',      
+    descripcion: 'Foto atesorada de mi corazon ... tiene gustos raros pero que se puede hacer la amo',
     fecha: '2025-11-23T23:16:10.725909+00:00'
   },
   {
@@ -88,7 +88,7 @@ const photoData = [
   },
   {
     filename: 'ale-waparubia.jpg',
-    descripcion: 'Alejandra saliendo de algún sitio quien sabe donde pero está linda *ñam te como toda. amor te me haces muy sexi en esa foto. Todo me palpita*',     
+    descripcion: 'Alejandra saliendo de algún sitio quien sabe donde pero está linda *ñam te como toda. amor te me haces muy sexi en esa foto. Todo me palpita*',
     fecha: '2025-11-16T21:22:33.404191+00:00'
   },
   {
@@ -168,7 +168,7 @@ const photoData = [
   },
   {
     filename: 'aleyo-portones.jpg',
-    descripcion: 'Yo (Kevin) y una fan tomandose una foto sin mi consentimiento ni aprobación, una clara violación a mis derechos constitucionales e integridad como humano pero como estaba linda y tierna la dejé',   
+    descripcion: 'Yo (Kevin) y una fan tomandose una foto sin mi consentimiento ni aprobación, una clara violación a mis derechos constitucionales e integridad como humano pero como estaba linda y tierna la dejé',
     fecha: '2025-07-12T13:16:14.239408+00:00'
   },
   {
@@ -188,7 +188,7 @@ const photoData = [
   },
   {
     filename: 'alyo-casares-6m.jpg',
-    descripcion: 'Casa res fotoito, alejandra salió wapisima wtf O: 😍😍 yo sali con mi ojo vago jsjsj',    
+    descripcion: 'Casa res fotoito, alejandra salió wapisima wtf O: 😍😍 yo sali con mi ojo vago jsjsj',
     fecha: '2025-11-30T21:11:30.069388+00:00'
   },
   {
@@ -221,19 +221,16 @@ const photoData = [
     descripcion: 'A: Después de ver Project Hail Mary 👎😭 post chillada , que lindo fue verte sensible jsjsjs no había visto tan cerca ese tú 🫂',
     fecha: '2026-04-10T00:00:00+00:00'
   },
-
   {
     filename: 'aleyo-hailmary2.jpeg',
     descripcion: 'Bueno si con esta foto alguien duda de que te amo mi amor entonces están ciegos, y como dice el rocky ... no es suficiente :c',
     fecha: '2026-04-10T00:00:00+00:00'
   },
-
   {
     filename: 'aleyo-jardinbotanico2.jpeg',
     descripcion: 'Yo amo la comida y a mi novia, por suerte en esta foto podemos ver que me puedo comer ambas 😍',
     fecha: '2026-01-31T00:00:00+00:00'
   },
-
   {
     filename: 'aleyo-jaridnbotanico1.jpeg',
     descripcion: 'Foto todos guapos ante de que nos coma una manada rabiosa de mosquitos',
@@ -244,19 +241,16 @@ const photoData = [
     descripcion: 'A: Parece que alguien está recargándose JAAJ pero es el efecto nomás. Ese día estábamos guapotes',
     fecha: '2026-04-04T00:00:00+00:00'
   },
-
   {
     filename: 'aleyo-lluviachifa.jpeg',
     descripcion: 'A: Día épico amore mío después de correr en la lluvia y darnos besitos fue lindisimoooo , Disney momento en mi mente jssjs te amo',
     fecha: '2026-02-20T00:00:00+00:00'
   },
-
   {
     filename: 'aleyo-parquehistorico1.jpeg',
     descripcion: 'A: Parque histórico salidita 😛 te ves chinito de sonreír 😍 agarrando lo que te pertenece (o sea yo)😠☝️',
     fecha: '2026-05-02T00:00:00+00:00'
   },
-
   {
     filename: 'aleyo-parquehistorico2.jpeg',
     descripcion: 'Foto obligada digo tomada con mucho amor, 1/20 fotos creo jajaja',
@@ -272,36 +266,31 @@ const photoData = [
     descripcion: 'Alejandra me regaló una torta vasca de cumpleaños 🥺 como no me iba a enamorar',
     fecha: '2025-11-04T15:18:52.639510+00:00'
   },
-
   {
     filename: 'alemichi.jpg',
     descripcion: 'Ida al parque de la kenedy, habian full gatitos. Hermoso día donde alejandra se enteró que los gatos tienen personalidad jajaja',
     fecha: '2025-05-24T00:00:00+00:00'
   },
-
   {
     filename: 'alerojo.jpg',
     descripcion: 'De rojo de te ves demasiado bien 😳',
     fecha: '2025-06-02T05:11:46.573258+00:00'
   },
-
   {
     filename: 'aleyo-casatia1.jpeg',
     descripcion: 'A: Y ese pucheritoooo😭😭😍😍😍 basta me dio un ataque de amor lol',
     fecha: '2026-03-06T00:00:00+00:00'
   },
-
   {
     filename: 'aleyo-comidamexa1.jpeg',
     descripcion: 'A: Cumpleaños de Lina la dimos toda amor , me encanta todo contigo y si quisiste bailar (indispensable para mí en una pareja) aparte fuiste mi Barbie JAJAJA Tini Tini Tini muaksss',
     fecha: '2026-01-31T00:00:00+00:00'
   },
-    {
+  {
     filename: 'aleyo-skincare2.jpeg',
     descripcion: 'skincare pero desde el espejo como todo un divo',
     fecha: '2026-02-01T00:00:00+00:00'
   },
-
   {
     filename: 'yo-presodetuslabiosamor.jpeg',
     descripcion: 'Aqui luciendo mi corte de reo con un filtro de fuckboy ',
@@ -326,6 +315,301 @@ const photoData = [
     filename: 'yo-pumplips.jpg',
     descripcion: 'Estoy yo luego de samparme varias cucharadas de ají (oil chilli flakes) producto estrella de mis ajíes pero si que me inchó los labio diomio.',
     fecha: '2025-10-26T13:55:21.698681+00:00'
+  },
+  {
+    filename: 'ale-playa001.jpeg',
+    descripcion: 'Alejandra enviandome fotos de su viaje a la playa?',
+    fecha: '2025-05-02T10:35:06+00:00'
+  },
+  {
+    filename: 'ale-elgranteo.jpeg',
+    descripcion: 'cumplea;os del gran teo, Alejandra no fue jsjs',
+    fecha: '2025-04-27T00:17:37+00:00'
+  },
+  {
+    filename: 'ale-vino.jpeg',
+    descripcion: 'mi novia bella mareandose con una sangria',
+    fecha: '2025-04-25T22:48:10+00:00'
+  },
+  {
+    filename: 'kevin-maikimoramen.jpeg',
+    descripcion: 'ramen criollo? jsjs picante del diavlo',
+    fecha: '2025-05-10T22:46:33+00:00'
+  },
+  {
+    filename: 'kevin-pendejo.jpeg',
+    descripcion: 'mmmm no hablemos de eso',
+    fecha: '2025-05-11T19:13:35+00:00'
+  },
+  {
+    filename: 'ale-remedioslocos.jpeg',
+    descripcion: 'una loquita con remedios loquitos',
+    fecha: '2025-05-11T19:48:46+00:00'
+  },
+  {
+    filename: 'kevin-omelette.jpeg',
+    descripcion: 'soy severendo crack, una foto digna de revista',
+    fecha: '2025-05-18T09:22:24+00:00'
+  },
+  {
+    filename: 'kevin-errorverde.jpeg',
+    descripcion: 'axilio socorro, no se hacer empanadas de verde',
+    fecha: '2025-05-18T18:32:28+00:00'
+  },
+  {
+    filename: 'saul-toppirata.jpeg',
+    descripcion: 'No salimos pero momento memorable jsjs',
+    fecha: '2025-05-28T23:55:20+00:00'
+  },
+  {
+    filename: 'ballerina-001.jpeg',
+    descripcion: 'baby ballerina, estaba chiquitititita',
+    fecha: '2025-05-30T18:36:17+00:00'
+  },
+  {
+    filename: 'ballerina-002.jpeg',
+    descripcion: 'ballerina otra vez, con razon que es engreida',
+    fecha: '2025-05-31T08:51:17+00:00'
+  },
+  {
+    filename: 'ale-todosederrumbo.jpeg',
+    descripcion: 'pobre ale :c todo comenzo a salir mal desde ese suceso ... paro',
+    fecha: '2025-06-01T16:09:09+00:00'
+  },
+  {
+    filename: 'ale-morocho.jpeg',
+    descripcion: 'Ale y un morocho, un morocho y Ale :3',
+    fecha: '2025-06-06T18:56:10+00:00'
+  },
+  {
+    filename: 'kevin-dormilon.jpeg',
+    descripcion: 'de chill',
+    fecha: '2025-06-14T09:47:57+00:00'
+  },
+  {
+    filename: 'ale-lindacomosiempre.jpeg',
+    descripcion: 'Ale y su crustaceo favorito, estas bella mi amor jeje',
+    fecha: '2025-06-15T12:28:37+00:00'
+  },
+  {
+    filename: 'ale-pilates001.jpeg',
+    descripcion: 'en su era pilates lalala',
+    fecha: '2025-06-18T18:56:42+00:00'
+  },
+  {
+    filename: 'ale-error002.jpeg',
+    descripcion: 'Adivinen quien se trajo las llaves del carro de steven jajajaja',
+    fecha: '2025-06-19T18:36:45+00:00'
+  },
+  {
+    filename: 'kevin-diplomagrad.jpeg',
+    descripcion: 'Graduadeichon',
+    fecha: '2025-06-20T10:58:03+00:00'
+  },
+  {
+    filename: 'ale-rimelmal.jpeg',
+    descripcion: 'Confió en un TikTok y el rimel se le corrio?',
+    fecha: '2025-06-21T22:24:20+00:00'
+  },
+  {
+    filename: 'ale-pilates002.jpeg',
+    descripcion: 'miau, grr, woof woof',
+    fecha: '2025-06-26T18:54:33+00:00'
+  },
+  {
+    filename: 'aleyo-paginaweb.jpeg',
+    descripcion: 'el origen de todo jajaja',
+    fecha: '2025-06-29T09:46:53+00:00'
+  },
+  {
+    filename: 'kevin-mediasfavoritas.jpeg',
+    descripcion: 'Das buenos regalos amor todo lo uso, te amo',
+    fecha: '2025-06-29T22:07:34+00:00'
+  },
+  {
+    filename: 'aleyo-fotobonita.jpeg',
+    descripcion: 'Dos guapos, de las primeras veces que te abrazaba por detras con segundas intenciones jeje',
+    fecha: '2025-06-30T00:02:04+00:00'
+  },
+  {
+    filename: 'kevin-tazagatita.jpeg',
+    descripcion: '😭😭 mi tacita de gato :( lo siento bebe',
+    fecha: '2025-06-30T07:39:11+00:00'
+  },
+  {
+    filename: 'ale-ojoslocos.jpeg',
+    descripcion: 'Alesita en pijama',
+    fecha: '2025-07-02T23:50:46+00:00'
+  },
+  {
+    filename: 'kevin-shootmortal.jpeg',
+    descripcion: 'Vodka ají matador juias juas',
+    fecha: '2025-07-05T14:03:31+00:00'
+  },
+  {
+    filename: 'kevin-victimashootmortal.jpeg',
+    descripcion: 'victima del vodka ají matador',
+    fecha: '2025-07-05T14:03:01+00:00'
+  },
+  {
+    filename: 'ale-diomio.jpeg',
+    descripcion: '😍😍😍 pero que ven mis ojos diomio',
+    fecha: '2025-07-05T16:29:56+00:00'
+  },
+  {
+    filename: 'ale-ysusamigas.jpeg',
+    descripcion: 'las crumbl cucas o algo por el estilo (me contuve jsjs)',
+    fecha: '2025-07-05T21:22:15+00:00'
+  },
+  {
+    filename: 'ale-fetichista02.jpeg',
+    descripcion: 'jajaja con esas locuras me enamoraste sapa',
+    fecha: '2025-07-05T22:24:53+00:00'
+  },
+  {
+    filename: 'kevin-desayunito.jpeg',
+    descripcion: '😭😭 mi tacita',
+    fecha: '2025-07-09T07:32:50+00:00'
+  },
+  {
+    filename: 'ale-cenafit.jpeg',
+    descripcion: 'Comidita fitness',
+    fecha: '2025-07-10T19:08:29+00:00'
+  },
+  {
+    filename: 'kevin-evidenciaA.jpeg',
+    descripcion: 'Evidencia, pacifico me devolvió la compra de los smart rolls jeje',
+    fecha: '2025-07-11T07:14:28+00:00'
+  },
+  {
+    filename: 'copo-quehorror.jpeg',
+    descripcion: 'Pobre copito jsjs',
+    fecha: '2025-06-17T22:28:33+00:00'
+  },
+  {
+    filename: 'kevin-tumblr.jpeg',
+    descripcion: 'si es borrosa es tumblr',
+    fecha: '2025-06-28T08:59:09+00:00'
+  },
+  {
+    filename: 'ale-azulgod.jpeg',
+    descripcion: 'Parece una muñequita O;',
+    fecha: '2025-07-13T11:33:23+00:00'
+  },
+  {
+    filename: 'pierina-chao.jpeg',
+    descripcion: 'pipipipi',
+    fecha: '2025-07-18T23:42:21+00:00'
+  },
+  {
+    filename: 'kevin-ojito.jpeg',
+    descripcion: 'ojito mi amor',
+    fecha: '2025-07-26T18:56:23+00:00'
+  },
+  {
+    filename: 'kevin-fotoperfil.jpeg',
+    descripcion: 'oye si quedaba de foto de perfil sabes jaja',
+    fecha: '2025-07-26T20:35:57+00:00'
+  },
+  {
+    filename: 'ale-rulay.jpeg',
+    descripcion: 'andamo rulay andamo rulaay',
+    fecha: '2025-07-27T18:26:09+00:00'
+  },
+  {
+    filename: 'ballerina-castrada.jpeg',
+    descripcion: 'Ligada de ballerina jajaj',
+    fecha: '2025-08-02T17:41:48+00:00'
+  },
+  {
+    filename: 'father-son.jpeg',
+    descripcion: 'Like father like son',
+    fecha: '2025-08-08T19:56:58+00:00'
+  },
+  {
+    filename: 'gatita01.jpeg',
+    descripcion: 'Pero que linda gatita O;',
+    fecha: '2025-08-09T16:23:33+00:00'
+  },
+  {
+    filename: 'pelucheraro.jpeg',
+    descripcion: 'Se ve super real wtf',
+    fecha: '2025-08-11T22:06:10+00:00'
+  },
+  {
+    filename: 'kevin-grillo.jpeg',
+    descripcion: 'un pejelagarto',
+    fecha: '2025-08-11T22:10:50+00:00'
+  },
+  {
+    filename: 'ale-fantasma.jpeg',
+    descripcion: 'si fueras un fantasma yo si me vuelvo a enamorar de ti',
+    fecha: '2025-08-12T22:43:25+00:00'
+  },
+  {
+    filename: 'kevin-buennovio.jpeg',
+    descripcion: 'Como todo buen novio te saqué un ticket de comida',
+    fecha: '2025-08-13T13:36:17+00:00'
+  },
+  {
+    filename: 'kevin-malditabrea.jpeg',
+    descripcion: 'Pinche brea, me daño un buen pantalón 😭😭',
+    fecha: '2025-08-13T15:26:03+00:00'
+  },
+  {
+    filename: 'ale-emiliaconcert.jpeg',
+    descripcion: 'Concierto de emilia wuuuuu',
+    fecha: '2025-08-15T20:17:10+00:00'
+  },
+  {
+    filename: 'aleyo-tacitasfoto.jpeg',
+    descripcion: 'Una pareja muy feliz claroqiesí',
+    fecha: '2025-08-16T17:23:53+00:00'
+  },
+  {
+    filename: 'kevin-arrormalote.jpeg',
+    descripcion: 'Error garrafal jajaja',
+    fecha: '2025-08-22T12:53:33+00:00'
+  },
+  {
+    filename: 'aleyo-gym001.jpeg',
+    descripcion: 'sudados pero no por las razones correctas 😒',
+    fecha: '2025-08-23T20:12:04+00:00'
+  },
+  {
+    filename: 'aleyo-gym002.jpeg',
+    descripcion: 'er diavlo mano y ese brazo?',
+    fecha: '2025-08-24T01:39:56+00:00'
+  },
+  {
+    filename: 'copito-wapo02.jpeg',
+    descripcion: 'Lo subo nada mas porque está wapo',
+    fecha: '2025-08-24T04:12:36+00:00'
+  },
+  {
+    filename: 'ballerina-003.jpeg',
+    descripcion: 'Y esa gata piciosa toda ninja',
+    fecha: '2025-08-26T20:36:06+00:00'
+  },
+  {
+    filename: 'quejeso.jpeg',
+    descripcion: 'quejeso de nuevo jsjsj',
+    fecha: '2025-08-29T21:45:35+00:00'
+  },
+  {
+    filename: 'quejeso02.jpeg',
+    descripcion: 'jsjsjs que miedo',
+    fecha: '2025-08-30T07:47:23+00:00'
+  },
+  {
+    filename: 'kevin-squites.jpeg',
+    descripcion: 'que rikos esquites diomio',
+    fecha: '2025-08-30T13:51:10+00:00'
+  },
+  {
+    filename: 'kevin-comida.jpeg',
+    descripcion: 'que rico diomio',
+    fecha: '2025-09-02T18:58:02+00:00'
   }
 ]
 

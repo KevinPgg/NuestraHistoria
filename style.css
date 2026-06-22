@@ -1,7 +1,73 @@
 body {
     font-family: 'Nunito', sans-serif;
     overflow-x: hidden;
-    background: linear-gradient(to bottom, #ffe4e6, #fff1f2); /* Fondo rosado suave */
+    color: #43342b;
+    min-height: 100vh;
+    /* "Suelo" que se desplaza con el contenido: dorado arriba -> rosa al fondo del scroll */
+    background: linear-gradient(180deg,
+        #ffe7c6 0%,
+        #ffd8c6 10%,
+        #fccdd2 32%,
+        #f8c2d5 60%,
+        #f3acce 100%);
+    background-attachment: scroll;
+}
+
+/* ===== Capa ambiental: cielo melón FIJO + bokeh + rayos (juego de luces, solo CSS) ===== */
+#ambient-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+    /* Cielo amarillo-melón sticky: franja más baja en la parte superior */
+    background:
+        radial-gradient(1150px 360px at 80% -14%, rgba(255, 205, 130, 0.9), rgba(255, 205, 130, 0) 62%),
+        radial-gradient(720px 240px at 16% -16%, rgba(255, 226, 172, 0.5), transparent 62%);
+}
+
+/* Bokeh: círculos de luz cálida flotando, como sol entre los árboles */
+#ambient-bg::before {
+    content: '';
+    position: absolute;
+    inset: -12%;
+    background:
+        radial-gradient(circle at 15% 28%, rgba(255, 243, 205, 0.90) 0 5px, transparent 8px),
+        radial-gradient(circle at 70% 18%, rgba(255, 230, 175, 0.80) 0 9px, transparent 13px),
+        radial-gradient(circle at 40% 66%, rgba(255, 245, 210, 0.70) 0 7px, transparent 11px),
+        radial-gradient(circle at 88% 58%, rgba(255, 222, 165, 0.85) 0 13px, transparent 17px),
+        radial-gradient(circle at 55% 40%, rgba(255, 250, 225, 0.60) 0 4px, transparent 7px),
+        radial-gradient(circle at 28% 88%, rgba(255, 232, 188, 0.70) 0 10px, transparent 14px),
+        radial-gradient(circle at 80% 90%, rgba(255, 240, 200, 0.65) 0 8px, transparent 12px);
+    filter: blur(2px);
+    animation: bokehFloat 14s ease-in-out infinite alternate;
+}
+
+/* Rayos de luz diagonales muy sutiles */
+#ambient-bg::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(106deg,
+        transparent 0 72px,
+        rgba(255, 237, 190, 0.10) 72px 76px,
+        transparent 76px 168px);
+    mix-blend-mode: screen;
+    animation: rayDrift 18s linear infinite;
+}
+
+@keyframes bokehFloat {
+    from { transform: translateY(0)     scale(1);    opacity: 0.6; }
+    to   { transform: translateY(-30px) scale(1.05); opacity: 1;   }
+}
+
+@keyframes rayDrift {
+    to { background-position: 360px 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #ambient-bg::before,
+    #ambient-bg::after { animation: none; }
 }
 
 /* Efecto de lluvia de fondo */
@@ -182,8 +248,9 @@ body {
     aspect-ratio: 1 / 1; /* Hacemos que sean cuadradas */
     overflow: hidden;
     border-radius: 1rem;
-    background-color: #f3f4f6; /* Gris claro de fondo */
-    border: 2px solid #e5e7eb;
+    background-color: rgba(255, 250, 244, 0.55); /* Crema translúcido */
+    border: 2px solid rgba(255, 255, 255, 0.7);
+    box-shadow: 0 6px 16px rgba(180, 110, 40, 0.12);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -202,7 +269,7 @@ body {
 .photo-container:hover {
     cursor: pointer;
     transform: translateY(-4px);
-    box-shadow: 0 10px 20px rgba(244, 63, 94, 0.15);
+    box-shadow: 0 14px 30px rgba(230, 150, 60, 0.30);
 }
 
 .photo-overlay {
@@ -211,7 +278,7 @@ body {
     display: flex;
     align-items: flex-end;
     padding: 0.75rem;
-    background: linear-gradient(to top, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0));
+    background: linear-gradient(to top, rgba(255, 248, 238, 0.96), rgba(255, 248, 238, 0));
     opacity: 0;
     transition: opacity 0.3s ease;
 }
@@ -222,7 +289,7 @@ body {
 
 .photo-snippet {
     font-size: 0.75rem;
-    color: #be123c;
+    color: #9a3412;
     font-weight: 600;
     line-height: 1.2rem;
 }
@@ -239,9 +306,20 @@ body {
     padding: 0.5rem;
 }
 
-/* --- MODAL DE FOTOS --- */
+/* --- MODAL DE FOTOS (Golden Hour) --- */
+/* Tinte cálido en el velo del modal (sobrescribe bg-black/60 de Tailwind) */
+#photo-modal {
+    background: rgba(45, 24, 14, 0.55);
+}
+
 .photo-modal-card {
-    border: 2px solid #fda4af;
+    border: 2px solid rgba(255, 210, 150, 0.85);
+    /* Sustituye el bg-white/90 de Tailwind por un degradado cálido */
+    background: linear-gradient(158deg, #fffaf3 0%, #fff1e6 52%, #ffe9e3 100%) !important;
+    /* Resplandor cálido estático alrededor (sin animación) */
+    box-shadow:
+        0 24px 60px rgba(120, 60, 20, 0.35),
+        0 0 55px rgba(255, 195, 115, 0.4);
     animation: slideIn 0.35s ease-out forwards;
 }
 
@@ -249,18 +327,25 @@ body {
     padding: 1rem 1.5rem 0.75rem; /* gap inferior entre fecha e imagen */
     display: flex;
     justify-content: flex-start;
-    border-bottom: 1px solid #ffe4e6; /* separador suave */
+    border-bottom: 1px solid rgba(255, 200, 150, 0.5); /* separador cálido */
+    position: relative;
+    z-index: 2;
 }
 
 .photo-modal-content {
     display: grid;
     grid-template-columns: 1.2fr 1fr;
     gap: 0;
+    position: relative;
+    z-index: 2;
 }
 
 .photo-modal-media {
     padding: 1.25rem 1.5rem 1.5rem; /* gap superior refuerza la separación */
-    background: #fffafc;
+    /* Glow cálido detrás de la foto */
+    background:
+        radial-gradient(420px 300px at 32% 30%, rgba(255, 210, 140, 0.50), transparent 70%),
+        #fff7ef;
     display: flex;
     align-items: center;
 }
@@ -272,7 +357,7 @@ body {
     object-fit: cover;
     border-radius: 1rem; /* esquinas redondeadas en la imagen */
     background: #fff;
-    box-shadow: 0 4px 16px rgba(244, 63, 94, 0.1);
+    box-shadow: 0 14px 34px rgba(150, 80, 25, 0.28);
 }
 
 /* --- BADGE DE FECHA EN MINIATURAS --- */
@@ -280,8 +365,8 @@ body {
     position: absolute;
     bottom: 0.45rem;
     left: 0.45rem;
-    background: rgba(255, 255, 255, 0.88);
-    color: #be123c;
+    background: rgba(255, 250, 240, 0.9);
+    color: #9a3412;
     font-size: 0.6rem;
     font-weight: 700;
     letter-spacing: 0.05em;
@@ -290,7 +375,7 @@ body {
     border-radius: 999px;
     pointer-events: none;
     backdrop-filter: blur(4px);
-    box-shadow: 0 2px 6px rgba(244, 63, 94, 0.15);
+    box-shadow: 0 2px 6px rgba(200, 120, 40, 0.2);
     line-height: 1.4;
     z-index: 2;
 }
@@ -298,19 +383,19 @@ body {
 .photo-modal-desc {
     padding: 2rem;
     font-size: 1rem;
-    color: #374151;
+    color: #4a3a2e;
     display: flex;
     align-items: center;
 }
 
 .photo-modal-date {
-    background: rgba(255, 255, 255, 0.9);
-    color: #be123c;
+    background: rgba(255, 250, 240, 0.95);
+    color: #9a3412;
     font-weight: 700;
     padding: 0.35rem 0.75rem;
     border-radius: 999px;
     font-size: 0.75rem;
-    box-shadow: 0 6px 14px rgba(244, 63, 94, 0.2);
+    box-shadow: 0 6px 14px rgba(200, 120, 40, 0.25);
 }
 
 @media (max-width: 768px) {
@@ -385,35 +470,181 @@ body {
 }
 
 .photo-filter-toggle,
-.random-photo-btn {
+.random-photo-btn,
+.photo-sort-btn {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
     background: #fff;
-    color: #be123c;
-    border: 2px solid #fda4af;
+    color: #9a3412;
+    border: 2px solid #f6b88a;
     padding: 0.5rem 1rem;
     border-radius: 999px;
     font-weight: 700;
-    box-shadow: 0 8px 18px rgba(244, 63, 94, 0.15);
+    box-shadow: 0 8px 18px rgba(224, 122, 24, 0.15);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     cursor: pointer;
 }
 
 .photo-filter-toggle:hover,
-.random-photo-btn:hover {
+.random-photo-btn:hover,
+.photo-sort-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 12px 24px rgba(244, 63, 94, 0.2);
+    box-shadow: 0 12px 24px rgba(224, 122, 24, 0.22);
 }
 
 /* Variante visual del botón Random (fondo ligeramente diferente) */
 .random-photo-btn {
-    background: #fff1f2;
-    border-color: #fb7185;
+    background: #fff4ea;
+    border-color: #f59e42;
 }
 
 .random-photo-btn:hover {
-    background: #ffe4e6;
+    background: #ffe8d2;
+}
+
+/* ===== Menú de orden (Sort) ===== */
+.photo-sort-wrap {
+    position: relative;
+}
+
+.photo-sort-menu {
+    position: absolute;
+    top: calc(100% + 0.4rem);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #fff;
+    border: 1px solid rgba(224, 122, 24, 0.25);
+    border-radius: 0.9rem;
+    box-shadow: 0 16px 30px rgba(120, 60, 20, 0.2);
+    padding: 0.4rem;
+    z-index: 30;
+    min-width: 200px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.photo-sort-menu button {
+    text-align: left;
+    background: transparent;
+    border: none;
+    padding: 0.5rem 0.7rem;
+    border-radius: 0.6rem;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: #7c3a12;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.photo-sort-menu button:hover {
+    background: #ffeeda;
+}
+
+.photo-sort-menu button.is-active {
+    background: #ffe0c2;
+    color: #9a3412;
+}
+
+/* ===== Chips de filtro dinámico (Año / Mes / Día) ===== */
+/* Encabezado del panel */
+.pf-head {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-weight: 800;
+    font-size: 0.82rem;
+    letter-spacing: 0.02em;
+    color: #b45309;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid rgba(224, 122, 24, 0.22);
+}
+
+.pf-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    flex-wrap: nowrap;
+    width: 100%;
+}
+
+/* Separador entre filas (Año / Mes / Día) — sigue la paleta cálida */
+.pf-row + .pf-row {
+    border-top: 1px dashed rgba(224, 122, 24, 0.28);
+    padding-top: 0.7rem;
+}
+
+.pf-label {
+    flex: 0 0 3rem;
+    text-align: right;
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #9a3412;
+    padding-top: 0.42rem;
+}
+
+.pf-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+.pf-chip {
+    border: 1.5px solid #f6b88a;
+    background: #fff;
+    color: #9a3412;
+    padding: 0.3rem 0.7rem;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: background 0.18s ease, border-color 0.18s ease, transform 0.15s ease;
+}
+
+.pf-chip:hover {
+    background: #ffeeda;
+    transform: translateY(-1px);
+}
+
+.pf-chip.is-active {
+    background: #f59e42;
+    border-color: #e07a18;
+    color: #fff;
+    box-shadow: 0 4px 10px rgba(224, 122, 24, 0.3);
+}
+
+.pf-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    border-top: 1px solid rgba(224, 122, 24, 0.2);
+    padding-top: 0.6rem;
+}
+
+.pf-count {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #b06a2c;
+}
+
+.pf-reset {
+    border: 1px solid #e5e7eb;
+    background: #fff;
+    color: #6b7280;
+    padding: 0.35rem 0.9rem;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: background 0.18s ease;
+}
+
+.pf-reset:hover {
+    background: #f3f4f6;
 }
 
 /* --- ESTADO VACÍO DE GALERÍA --- */
@@ -461,14 +692,16 @@ body {
 
 .photo-filter-panel {
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    justify-content: center;
-    background: rgba(255, 255, 255, 0.85);
-    padding: 0.75rem 1rem;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.7rem;
+    width: 100%;
+    max-width: 640px;
+    background: rgba(255, 252, 247, 0.9);
+    padding: 0.9rem 1.1rem;
     border-radius: 1rem;
-    border: 1px solid rgba(244, 63, 94, 0.2);
-    box-shadow: 0 10px 25px rgba(244, 63, 94, 0.1);
+    border: 1px solid rgba(224, 122, 24, 0.22);
+    box-shadow: 0 10px 25px rgba(180, 110, 40, 0.12);
 }
 
 .photo-filter-btn {
@@ -584,7 +817,9 @@ body {
     align-items: center;
     justify-content: center;
     padding: 1.25rem;
-    background: linear-gradient(160deg, #ffe4e6 0%, #fff1f2 50%, #fce7f3 100%);
+    background:
+        radial-gradient(800px 600px at 80% 6%, rgba(255, 196, 120, 0.8), transparent 55%),
+        linear-gradient(165deg, #ffe9c9 0%, #ffd9c4 42%, #f6c4d6 78%, #e7c3e6 100%);
     transition: opacity 0.6s ease, transform 0.6s ease;
 }
 
@@ -1186,7 +1421,6 @@ body {
     grid-template-columns: repeat(3, 1fr);
     gap: 10px;
     width: 100%;
-    margin-bottom: 0.75rem;
 }
 
 /* ── Carta individual ── */
