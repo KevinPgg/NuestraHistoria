@@ -388,23 +388,30 @@ const photoModalDesc    = document.getElementById('photo-modal-desc');
 const photoModalDate    = document.getElementById('photo-modal-date');
 const filterToggle      = document.getElementById('photo-filter-toggle');
 const filterPanel       = document.getElementById('photo-filter-panel');
-const filterButtons     = Array.from(document.querySelectorAll('.photo-filter-btn'));
-const filterPopup       = document.getElementById('photo-filter-popup');
-const filterTitle       = document.getElementById('photo-filter-title');
-const filterClose       = document.getElementById('photo-filter-close');
-const filterApply       = document.getElementById('photo-filter-apply');
-const filterDayInput    = document.getElementById('photo-filter-day');
-const filterWeekInput   = document.getElementById('photo-filter-week');
-const filterMonthInput  = document.getElementById('photo-filter-month');
-const filterYearInput   = document.getElementById('photo-filter-year');
+const pfYears           = document.getElementById('pf-years');
+const pfMonths          = document.getElementById('pf-months');
+const pfDays            = document.getElementById('pf-days');
+const pfMonthRow        = document.getElementById('pf-month-row');
+const pfDayRow          = document.getElementById('pf-day-row');
+const pfReset           = document.getElementById('pf-reset');
+const pfCount           = document.getElementById('pf-count');
+const sortBtn           = document.getElementById('photo-sort-btn');
+const sortMenu          = document.getElementById('photo-sort-menu');
+const sortLabel         = document.getElementById('photo-sort-label');
 
 // Paginación
 const PAGE_SIZE = 30;
 let currentPage      = 0;
 let allFilteredCards = [];
 let allCards         = [];
-let activeFilter     = 'all';
-let selectedFilterValue = null;
+
+// Estado de filtros dinámicos y orden — multi-selección acumulable (Sets)
+const activeYears  = new Set(); // años seleccionados; vacío = todos
+const activeMonths = new Set(); // meses 0-11 seleccionados; vacío = todos
+const activeDays   = new Set(); // días 1-31 seleccionados; vacío = todos
+let sortMode    = 'random'; // 'random' | 'date-asc' | 'date-desc'
+let dateIndex   = new Map(); // año -> Map(mes -> Set(día))
+const MONTHS_SHORT = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 
 const openPhotoModal = (card) => {
     photoModalImg.src = `img/${card.fotoFileName}`;
@@ -424,61 +431,80 @@ photoModal.addEventListener('click', (e) => {
     if (e.target === photoModal) closePhotoModal();
 });
 
-const getRangeForFilter = (type, value) => {
-    if (!value) return null;
-
-    switch (type) {
-        case 'day': {
-            const start = new Date(value);
-            if (Number.isNaN(start.getTime())) return null;
-            const end = new Date(start);
-            start.setUTCHours(0, 0, 0, 0);
-            end.setUTCHours(23, 59, 59, 999);
-            return { start, end };
-        }
-        case 'week': {
-            const [yearStr, weekStr] = value.split('-W');
-            const year = Number(yearStr);
-            const week = Number(weekStr);
-            if (!year || !week) return null;
-            const jan4 = new Date(Date.UTC(year, 0, 4));
-            const jan4Day = (jan4.getUTCDay() + 6) % 7;
-            const weekStart = new Date(jan4);
-            weekStart.setUTCDate(jan4.getUTCDate() - jan4Day + (week - 1) * 7);
-            weekStart.setUTCHours(0, 0, 0, 0);
-            const weekEnd = new Date(weekStart);
-            weekEnd.setUTCDate(weekStart.getUTCDate() + 6);
-            weekEnd.setUTCHours(23, 59, 59, 999);
-            return { start: weekStart, end: weekEnd };
-        }
-        case 'month': {
-            const [yearStr, monthStr] = value.split('-');
-            const year = Number(yearStr);
-            const month = Number(monthStr) - 1;
-            if (!year || month < 0) return null;
-            const monthStart = new Date(Date.UTC(year, month, 1));
-            const monthEnd = new Date(Date.UTC(year, month + 1, 0, 23, 59, 59, 999));
-            return { start: monthStart, end: monthEnd };
-        }
-        case 'year': {
-            const year = Number(value);
-            if (!year) return null;
-            const yearStart = new Date(Date.UTC(year, 0, 1));
-            const yearEnd = new Date(Date.UTC(year, 11, 31, 23, 59, 59, 999));
-            return { start: yearStart, end: yearEnd };
-        }
-        default:
-            return null;
-    }
+// Construye el índice de fechas disponibles a partir de las cards.
+// Estructura: Map(año -> Map(mes -> Set(día)))  — solo fechas que existen.
+const buildDateIndex = () => {
+    dateIndex = new Map();
+    allCards.forEach((card) => {
+        const d = normalizeDate(card.fecha);
+        if (!d) return;
+        const y = d.getUTCFullYear();
+        const m = d.getUTCMonth();
+        const day = d.getUTCDate();
+        if (!dateIndex.has(y)) dateIndex.set(y, new Map());
+        const months = dateIndex.get(y);
+        if (!months.has(m)) months.set(m, new Set());
+        months.get(m).add(day);
+    });
 };
 
+const hasAnyFilter = () => activeYears.size > 0 || activeMonths.size > 0 || activeDays.size > 0;
+
 const matchesFilter = (card) => {
-    if (activeFilter === 'all') return true;
     const date = normalizeDate(card.fecha);
     if (!date) return false;
-    const range = getRangeForFilter(activeFilter, selectedFilterValue);
-    if (!range) return false;
-    return date >= range.start && date <= range.end;
+    const y = date.getUTCFullYear();
+    const m = date.getUTCMonth();
+    const d = date.getUTCDate();
+    if (activeYears.size  && !activeYears.has(y))  return false;
+    if (activeMonths.size && !activeMonths.has(m)) return false;
+    if (activeDays.size   && !activeDays.has(d))   return false;
+    return true;
+};
+
+// Años en alcance: los seleccionados, o todos si no hay selección.
+const yearsInScope = () => (activeYears.size ? [...activeYears] : [...dateIndex.keys()]);
+
+// Meses disponibles = unión de meses existentes en los años en alcance.
+const availableMonths = () => {
+    const set = new Set();
+    yearsInScope().forEach((y) => {
+        const months = dateIndex.get(y);
+        if (months) months.forEach((_, m) => set.add(m));
+    });
+    return [...set].sort((a, b) => a - b);
+};
+
+// Días disponibles = unión de días existentes para (años en alcance) x (meses seleccionados).
+const availableDays = () => {
+    const set = new Set();
+    yearsInScope().forEach((y) => {
+        const months = dateIndex.get(y);
+        if (!months) return;
+        months.forEach((days, m) => {
+            if (activeMonths.has(m)) days.forEach((d) => set.add(d));
+        });
+    });
+    return [...set].sort((a, b) => a - b);
+};
+
+// Quita de la selección meses/días que ya no estén disponibles (al cambiar años/meses).
+const pruneSelection = () => {
+    const months = new Set(availableMonths());
+    [...activeMonths].forEach((m) => { if (!months.has(m)) activeMonths.delete(m); });
+    const days = new Set(availableDays());
+    [...activeDays].forEach((d) => { if (!days.has(d)) activeDays.delete(d); });
+};
+
+// Ordena según el modo activo. 'random' conserva el orden barajado diario de allCards.
+const applySort = (cards) => {
+    const ms = (c) => {
+        const d = normalizeDate(c.fecha);
+        return d ? d.getTime() : 0;
+    };
+    if (sortMode === 'date-asc')  return [...cards].sort((a, b) => ms(a) - ms(b));
+    if (sortMode === 'date-desc') return [...cards].sort((a, b) => ms(b) - ms(a));
+    return cards;
 };
 
 // Render de un lote de cards (append, no reemplaza)
@@ -545,9 +571,16 @@ const loadPage = () => {
 };
 
 const applyFilter = () => {
-    allFilteredCards = activeFilter === 'all'
-        ? allCards
-        : allCards.filter(matchesFilter);
+    const filtered = hasAnyFilter()
+        ? allCards.filter(matchesFilter)
+        : [...allCards];
+
+    allFilteredCards = applySort(filtered);
+
+    if (pfCount) {
+        const n = allFilteredCards.length;
+        pfCount.textContent = `${n} ${n === 1 ? 'recuerdo' : 'recuerdos'}`;
+    }
 
     currentPage = 0;
     galleryContainer.innerHTML = '';
@@ -560,6 +593,70 @@ const applyFilter = () => {
 
     galleryEmpty.classList.add('hidden');
     loadPage();
+};
+
+// ----- Render de chips de filtro (solo fechas disponibles) -----
+const makeChip = (text, isActive, onClick) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'pf-chip' + (isActive ? ' is-active' : '');
+    btn.textContent = text;
+    btn.addEventListener('click', onClick);
+    return btn;
+};
+
+const toggleInSet = (set, value) => {
+    if (set.has(value)) set.delete(value);
+    else set.add(value);
+};
+
+const renderYearChips = () => {
+    pfYears.innerHTML = '';
+    [...dateIndex.keys()].sort((a, b) => a - b).forEach((year) => {
+        pfYears.appendChild(makeChip(year, activeYears.has(year), () => {
+            toggleInSet(activeYears, year);
+            refreshFilterUI();
+            applyFilter();
+        }));
+    });
+};
+
+const renderMonthChips = () => {
+    const months = availableMonths();
+    pfMonths.innerHTML = '';
+    months.forEach((month) => {
+        pfMonths.appendChild(makeChip(MONTHS_SHORT[month], activeMonths.has(month), () => {
+            toggleInSet(activeMonths, month);
+            refreshFilterUI();
+            applyFilter();
+        }));
+    });
+    pfMonthRow.classList.toggle('hidden', months.length === 0);
+};
+
+const renderDayChips = () => {
+    // Los días solo tienen sentido si hay al menos un mes elegido.
+    if (activeMonths.size === 0) {
+        pfDayRow.classList.add('hidden');
+        return;
+    }
+    const days = availableDays();
+    pfDays.innerHTML = '';
+    days.forEach((day) => {
+        pfDays.appendChild(makeChip(day, activeDays.has(day), () => {
+            toggleInSet(activeDays, day);
+            refreshFilterUI();
+            applyFilter();
+        }));
+    });
+    pfDayRow.classList.toggle('hidden', days.length === 0);
+};
+
+const refreshFilterUI = () => {
+    pruneSelection();
+    renderYearChips();
+    renderMonthChips();
+    renderDayChips();
 };
 
 const formatPhotoBadgeDate = (date) => {
@@ -586,77 +683,55 @@ const initGallery = async () => {
     const cardRegistros = await loadCardRegistros();
     const seed = new Date().toISOString().split('T')[0];
     allCards = shuffleArray(cardRegistros, seed);
+    buildDateIndex();
+    refreshFilterUI();
     applyFilter();
 };
 
+// Mostrar/ocultar el panel de filtros
 if (filterToggle && filterPanel) {
     filterToggle.addEventListener('click', () => {
         filterPanel.classList.toggle('hidden');
     });
 }
 
-const showFilterPopup = (type) => {
-    if (!filterPopup) return;
-    const inputs = [filterDayInput, filterWeekInput, filterMonthInput, filterYearInput];
-    inputs.forEach((input) => input.classList.add('hidden'));
-
-    if (type === 'day') {
-        filterTitle.textContent = 'Seleccionar día';
-        filterDayInput.classList.remove('hidden');
-    } else if (type === 'week') {
-        filterTitle.textContent = 'Seleccionar semana';
-        filterWeekInput.classList.remove('hidden');
-    } else if (type === 'month') {
-        filterTitle.textContent = 'Seleccionar mes';
-        filterMonthInput.classList.remove('hidden');
-    } else if (type === 'year') {
-        filterTitle.textContent = 'Seleccionar año';
-        filterYearInput.classList.remove('hidden');
-    }
-
-    filterPopup.classList.remove('hidden');
-};
-
-const hideFilterPopup = () => {
-    if (!filterPopup) return;
-    filterPopup.classList.add('hidden');
-};
-
-if (filterClose) {
-    filterClose.addEventListener('click', hideFilterPopup);
-}
-
-if (filterApply) {
-    filterApply.addEventListener('click', () => {
-        if (activeFilter === 'day') {
-            selectedFilterValue = filterDayInput.value || null;
-        } else if (activeFilter === 'week') {
-            selectedFilterValue = filterWeekInput.value || null;
-        } else if (activeFilter === 'month') {
-            selectedFilterValue = filterMonthInput.value || null;
-        } else if (activeFilter === 'year') {
-            selectedFilterValue = filterYearInput.value || null;
-        }
+// Botón "Mostrar todo": limpia la selección
+if (pfReset) {
+    pfReset.addEventListener('click', () => {
+        activeYears.clear();
+        activeMonths.clear();
+        activeDays.clear();
+        refreshFilterUI();
         applyFilter();
-        hideFilterPopup();
     });
 }
 
-filterButtons.forEach((button) => {
-    button.addEventListener('click', () => {
-        filterButtons.forEach((btn) => btn.classList.remove('is-active'));
-        button.classList.add('is-active');
-        activeFilter = button.dataset.filter || 'all';
-        if (activeFilter === 'all') {
-            selectedFilterValue = null;
-            hideFilterPopup();
-            applyFilter();
-            return;
-        }
-
-        showFilterPopup(activeFilter);
+// Menú de orden (Sort)
+if (sortBtn && sortMenu) {
+    sortBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        sortMenu.classList.toggle('hidden');
     });
-});
+
+    sortMenu.querySelectorAll('[data-sort]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            sortMode = btn.dataset.sort;
+            sortLabel.textContent = btn.textContent.replace(/\s*\(.*\)$/, '');
+            sortMenu.querySelectorAll('[data-sort]').forEach((b) => b.classList.remove('is-active'));
+            btn.classList.add('is-active');
+            sortMenu.classList.add('hidden');
+            applyFilter();
+        });
+    });
+
+    // Cerrar el menú al hacer clic fuera
+    document.addEventListener('click', (e) => {
+        if (!sortMenu.classList.contains('hidden') &&
+            !sortMenu.contains(e.target) && !sortBtn.contains(e.target)) {
+            sortMenu.classList.add('hidden');
+        }
+    });
+}
 
 initGallery();
 
