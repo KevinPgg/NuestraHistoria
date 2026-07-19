@@ -1,12 +1,15 @@
 // Feed inicial: lee la BD y muestra las fotos con miniaturas firmadas.
 // Server Component: la resolución de URLs firmadas ocurre en el servidor.
+import Link from "next/link";
 import { getFeed } from "@/lib/media";
 import { Header } from "@/components/Header";
 
 export const dynamic = "force-dynamic"; // URLs firmadas no se cachean
 
 export default async function FeedPage() {
-  const items = await getFeed(30, 0);
+  // A esta escala (122) cargamos todo de una con lazy load nativo en las <img>.
+  // Cuando el acervo crezca a varios cientos, migrar a paginación por cursor.
+  const items = await getFeed(500, 0);
   const conImagen = items.filter((m) => m.thumbUrl).length;
 
   return (
@@ -26,9 +29,10 @@ export default async function FeedPage() {
         ) : (
           <div className="grid grid-cols-3 gap-1 sm:gap-2">
             {items.map((m) => (
-              <figure
+              <Link
                 key={m.id}
-                className="group relative aspect-square overflow-hidden rounded-lg bg-white/5"
+                href={`/foto/${m.id}`}
+                className="group relative aspect-square overflow-hidden rounded-lg bg-white/5 focus:outline-none focus:ring-2 focus:ring-white/40"
               >
                 {m.thumbUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -43,7 +47,7 @@ export default async function FeedPage() {
                     sin imagen
                   </div>
                 )}
-              </figure>
+              </Link>
             ))}
           </div>
         )}
