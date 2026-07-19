@@ -2,7 +2,9 @@
 // Server Actions de la foto individual. Corren con la sesión del usuario, así que
 // la RLS de Supabase decide qué se permite (escritura sólo de lo propio).
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { storage } from "@/lib/storage";
 
 const MAX_COMENTARIO = 1000;
 
@@ -71,4 +73,36 @@ export async function deleteComment(
 
   await supabase.from("comments").delete().eq("id", commentId);
   revalidatePath(`/foto/${mediaId}`);
+}
+
+/**
+ * Borra una foto: elimina la fila de `media` (los likes/comentarios se van por
+ * ON DELETE CASCADE) y luego los objetos del bucket. Ambos pueden borrar (es
+ * material compartido; útil para limpiar repetidas). Redirige al feed.
+ */
+export async function deletePhoto(mediaId: string): Promise<void> {
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return;
+
+  const { data: row } = await supabase
+    .from("media")
+    .select("storage_path, thumb_path")
+    .eq("id", mediaId)
+    .maybeSingle();
+
+  const { error } = await supabase.from("media").delete().eq("id", mediaId);
+  if (error) return; // si RLS lo impide, no seguimos
+
+  if (row) {
+    const keys = [row.storage_path, row.thumb_path].filter(
+      (k): k is string => !!k
+    );
+    await storage.remove(keys).catch(() => {});
+  }
+
+  revalidatePath("/feed");
+  redirect("/feed");
 }

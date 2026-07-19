@@ -1,4 +1,5 @@
 // Barra superior con identidad del usuario en sesión.
+import Link from "next/link";
 import { getCurrentProfile } from "@/lib/profile";
 import { LogoutButton } from "./LogoutButton";
 
@@ -18,8 +19,16 @@ export async function Header() {
   return (
     <header className="sticky top-0 z-10 border-b border-white/10 bg-black/40 backdrop-blur">
       <div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-3">
-        <span className="text-base font-semibold">Nuestra Historia</span>
+        <Link href="/feed" className="text-base font-semibold">
+          Nuestra Historia
+        </Link>
         <div className="flex items-center gap-3">
+          <Link
+            href="/ajustes"
+            className="text-sm text-white/50 transition hover:text-white/90"
+          >
+            Ajustes
+          </Link>
           <div className="flex items-center gap-2">
             <span
               className={`flex h-8 w-8 items-center justify-center rounded-full border text-xs font-semibold ${accent}`}

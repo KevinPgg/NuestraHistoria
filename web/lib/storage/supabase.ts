@@ -39,4 +39,24 @@ export class SupabaseStorageProvider implements StorageProvider {
     }
     return out;
   }
+
+  async upload(
+    key: string,
+    data: Blob | ArrayBuffer | Uint8Array,
+    contentType = "application/octet-stream"
+  ): Promise<void> {
+    const supabase = createClient();
+    const { error } = await supabase.storage.from(BUCKET).upload(key, data, {
+      contentType,
+      upsert: false,
+    });
+    if (error) throw error;
+  }
+
+  async remove(keys: string[]): Promise<void> {
+    if (keys.length === 0) return;
+    const supabase = createClient();
+    const { error } = await supabase.storage.from(BUCKET).remove(keys);
+    if (error) throw error;
+  }
 }

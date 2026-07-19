@@ -8,6 +8,13 @@ const nextConfig = {
       // { protocol: 'https', hostname: '<tu-proyecto>.supabase.co' },
     ],
   },
+  experimental: {
+    // Las subidas de fotos pasan por Server Actions (adaptador de storage).
+    // El límite por defecto es 1MB; una WebP optimizada puede superarlo.
+    serverActions: {
+      bodySizeLimit: "12mb",
+    },
+  },
 };
 
 export default nextConfig;

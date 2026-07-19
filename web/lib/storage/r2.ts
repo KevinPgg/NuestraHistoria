@@ -33,4 +33,20 @@ export class R2StorageProvider implements StorageProvider {
     for (const k of keys) out[k] = await this.getUrl(k, expiresIn);
     return out;
   }
+
+  async upload(
+    _key: string,
+    _data: Blob | ArrayBuffer | Uint8Array,
+    _contentType?: string
+  ): Promise<void> {
+    throw new Error(
+      "R2StorageProvider.upload no implementado. Ver instrucciones en r2.ts."
+    );
+  }
+
+  async remove(_keys: string[]): Promise<void> {
+    throw new Error(
+      "R2StorageProvider.remove no implementado. Ver instrucciones en r2.ts."
+    );
+  }
 }

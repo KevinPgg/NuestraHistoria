@@ -143,3 +143,52 @@ Esto cubre tu requisito: ambos ven el perfil del otro, pero el propietario contr
 
 ## 6. Costo
 A tu escala (2 personas), todo entra en planes gratuitos: Vercel + Supabase + R2 + Deezer. El costo solo aparece si acumulas muchos GB de video; ahí R2 es lo más barato por su egress gratis. **Verifica los límites vigentes de cada tier antes de decidir, cambian seguido.**
+
+---
+
+## 7. Gestión de medios: subir / eliminar fotos (menú de configuración)
+
+Feature: que cualquiera de los dos pueda **subir** fotos nuevas y **eliminar** las
+repetidas o no deseadas, desde un menú de configuración en la app (sin tocar el
+manifiesto ni correr scripts). Reemplaza el flujo Python de la v1 (`import_photos.py`).
+
+### Subir
+Flujo propuesto (client → server action → storage + BD):
+1. El usuario elige una o varias imágenes en un `<input type="file" multiple>`.
+2. **Optimizar en el cliente antes de subir**: convertir a WebP y reescalar (~2000px,
+   calidad ~80) con `canvas`/`createImageBitmap`, para no subir el original pesado.
+   Generar también la miniatura (`thumbs/`). Esto mantiene la regla de "servir la
+   versión optimizada, no el original" (§1).
+3. Subir la clave `fotos/<slug>.webp` y `thumbs/<slug>.webp` **vía el adaptador**
+   (`web/lib/storage`), nunca al SDK directo. Requiere agregar un método `upload(key, blob)`
+   a la interfaz `StorageProvider` (hoy solo firma lectura).
+4. `insert` en `media` con `owner_id = auth.uid()`, `storage_path`/`thumb_path`
+   relativos, `descripcion`, y las fechas. Respetar `pickOldestDate` para
+   `fecha_mostrada` (la fecha REAL la pone el usuario en el formulario, porque la
+   metadata de WhatsApp miente — misma lección de la v1).
+
+Decisiones ⚠️ a validar:
+- ¿Optimización en cliente (más simple, sin servidor) o en una Edge Function
+  (más control, pero más piezas)? Recomiendo **cliente** a esta escala.
+- Slug/nombre: derivar de la descripción o pedir un nombre; evitar colisiones
+  (sufijo incremental si la clave existe).
+- Detección de repetidas al subir: comparar por hash del archivo o por nombre,
+  avisar antes de duplicar.
+
+### Eliminar (caso "repetida")
+- Botón de eliminar en la vista de foto individual (`/foto/[id]`), visible para
+  ambos (es material compartido) o solo para el `owner_id` — **decidir política**.
+- La server action borra la fila de `media` y **también** los objetos del bucket
+  (`fotos/` y `thumbs/`) vía el adaptador (agregar `remove(key)` a la interfaz).
+- Cuidado con el orden y con borrados en cascada: `likes`/`comments`/`media_music`
+  de esa foto deben irse con ella (FK `on delete cascade` o borrado explícito).
+- Confirmación previa (modal), porque es destructivo e irreversible.
+
+### RLS necesaria (cuando se implemente)
+- `media`: hoy solo hay lectura. Agregar policy de **INSERT** (`with_check owner_id = auth.uid()`)
+  y de **DELETE** (dueño, o ambos — según la decisión de arriba).
+- Storage: policies del bucket `media` para permitir `insert`/`delete` a
+  autenticados en las carpetas `fotos/` y `thumbs/`.
+
+Prioridad sugerida: después del núcleo social (likes/comentarios) y antes de
+Momentos, porque desbloquea que dejen de depender de ti para meter fotos.

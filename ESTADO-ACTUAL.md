@@ -27,8 +27,14 @@ punto de retomada.
 
 ## Qué funciona hoy
 - Login + guard de sesión (sin sesión → /login).
-- Feed con las 122 fotos (thumbs firmados en lote).
-- Header con identidad por usuario (novio azul / novia rosa) + logout.
+- Feed con las 122 fotos (thumbs firmados en lote, lazy load nativo).
+- Vista de foto individual `/foto/[id]`: imagen full, descripción, fecha.
+- Likes + comentarios por foto (server actions + RLS; eliminar comentario propio).
+- Subir foto desde `/ajustes`: optimiza a WebP (full + thumb) en el cliente, sube
+  por el adaptador de storage, inserta en `media` con fecha real elegida.
+- Eliminar foto desde `/foto/[id]` (con confirmación): borra fila + objetos del
+  bucket; likes/comentarios se van por ON DELETE CASCADE.
+- Header con identidad por usuario (novio azul / novia rosa) + link a Ajustes + logout.
 - BD completa con RLS; scripts en `supabase/` (schema, seed, storage, profiles-setup).
 
 ## Cómo correr
@@ -41,10 +47,11 @@ npm run dev   # http://localhost:3000
 ```
 
 ## Cola de features (orden sugerido)
-1. **Vista de foto individual + likes/comentarios** — *hacer juntos*: son la misma
-   pantalla (abrir foto en grande con `storage_path`, descripción, fecha) y dan
-   interacción real entre ustedes rápido. Tablas `likes`/`comments` ya existen;
-   faltan policies de escritura por usuario y la UI.
+1. **Vista de foto individual + likes/comentarios** — ✅ en curso. Ruta `/foto/[id]`
+   lista; feed muestra las 122 con lazy load nativo. Likes/comentarios: las policies
+   RLS **ya existían** (lectura autenticados, escritura solo propia); implementados
+   con server actions + UI. Subir/eliminar fotos = feature aparte (ver
+   PLANIFICACION §7).
 2. **Música Deezer** — buscador + reproductor preview 30s; "colgar" pista a foto
    (`media_music`, cache en `music_tracks`). Más aislado; puede esperar.
 3. **Momentos/recuerdos** — slideshow + selector; visibilidad public/private (RLS ya modelada).

@@ -6,6 +6,16 @@ export interface StorageProvider {
 
   /** Firma en lote (para el feed). Devuelve { clave: url }. */
   getUrls(keys: string[], expiresIn?: number): Promise<Record<string, string>>;
+
+  /** Sube un objeto a una clave (ej. 'fotos/x.webp'). Lanza si falla. */
+  upload(
+    key: string,
+    data: Blob | ArrayBuffer | Uint8Array,
+    contentType?: string
+  ): Promise<void>;
+
+  /** Borra una o varias claves. No falla si alguna no existe. */
+  remove(keys: string[]): Promise<void>;
 }
 
 export const DEFAULT_EXPIRES = 60 * 60; // 1 hora

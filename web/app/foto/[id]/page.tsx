@@ -7,6 +7,7 @@ import { getPhotoSocial } from "@/lib/social";
 import { Header } from "@/components/Header";
 import { LikeButton } from "@/components/LikeButton";
 import { CommentForm } from "@/components/CommentForm";
+import { DeletePhotoButton } from "@/components/DeletePhotoButton";
 import { deleteComment } from "./actions";
 
 export const dynamic = "force-dynamic"; // URLs firmadas + datos frescos
@@ -164,6 +165,10 @@ export default async function FotoPage({
 
           <CommentForm mediaId={media.id} />
         </section>
+
+        <footer className="mt-8 flex justify-end border-t border-white/5 pt-4">
+          <DeletePhotoButton mediaId={media.id} />
+        </footer>
       </main>
     </>
   );
