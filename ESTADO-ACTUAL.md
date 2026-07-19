@@ -65,6 +65,35 @@ punto de retomada.
   pool (con su social por-foto; secundario). Los ~125 posts auto-creados por la
   migración anterior con author NULL quedan huérfanos (invisibles); los 3 de Kevin
   aparecen en su perfil.
+- **Reacciones ILIMITADAS en el post** (reemplazan el like único). Botón
+  "🙂 Reaccionar" abre una burbuja con 6 tipos: ❤️ Me encanta, 😂 Me divierte,
+  😏 Me estremece, 😠 Me enoja, 😮 Me asombra, 👌 Excelenchi. Cada toque suma una
+  (sin límite); se ven los conteos por tipo y hay "deshacer". Tabla `post_reactions`
+  (sin unique). Código: `lib/reactions.ts`, `PostReactions.tsx`, `addReaction`/
+  `undoMyReaction`. SQL: `supabase/post-reactions.sql`. El stat de perfil pasó de
+  "Me encanta" a "Reacciones". `post_likes` y `PostLikeButton.tsx` quedaron sin uso.
+- **Borrado**: un POST lo borra solo su autor, con confirmación (RLS `author_id =
+  auth.uid()`). El borrado por 2 votos (novio+novia) es solo para fotos del POOL
+  (`/foto`, requiere correr `ola3-borrado-votos.sql`).
+- **Archivos obsoletos (borrables)**: `lib/favorites.ts`, `lib/profileMedia.ts`,
+  `components/FavoriteButton.tsx`, `ProfileFeed.tsx`, `ProfileFeedEditor.tsx`,
+  `PostLikeButton.tsx`, `PostMusic.tsx`. Tablas sin uso: `favorites`, `profile_media`,
+  `post_likes`, `webauthn_credentials`.
+
+## Despliegue a Vercel (checklist)
+1. `cd web && npm run build` en local — que compile sin errores (obligatorio; el
+   sandbox no puede verificarlo).
+2. Correr en Supabase (SQL Editor) lo pendiente: `supabase/ola3-borrado-votos.sql`
+   (para que el borrado por 2 votos del pool funcione). El resto de migraciones ya
+   están aplicadas vía MCP.
+3. Panel de Supabase → Authentication → Passkeys: activar + RP ID = dominio de
+   producción (ej. `nuestra-historia.vercel.app`) + RP origins https. Sin esto el
+   biométrico no funciona en producción.
+4. Vercel: Root Directory = `web`. Variables de entorno (de `web/.env`):
+   `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
+   `NEXT_PUBLIC_STORAGE_BUCKET=media`, `STORAGE_PROVIDER=supabase`.
+5. Tras el primer deploy, ajustar el RP ID/origins de passkeys al dominio real si
+   cambió.
 - **Modelo pool → perfil → destacados (estilo Instagram)**: `media` es el POOL
   compartido (feed). El perfil de cada usuario es una SELECCIÓN curada del pool
   (tabla `profile_media`, RLS: pareja lee, cada quien edita el suyo), no "lo que
