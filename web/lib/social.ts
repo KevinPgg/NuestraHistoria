@@ -85,3 +85,44 @@ export async function getPhotoSocial(mediaId: string): Promise<PhotoSocial> {
     comments: commentsView,
   };
 }
+
+export interface DeleteVotesState {
+  votedByMe: boolean;
+  /** Nombre de la pareja si ya votó (para "X quiere eliminar"). */
+  partnerName: string | null;
+  count: number;
+}
+
+/**
+ * Estado de los votos de borrado de una foto: si yo voté, si mi pareja votó
+ * (y su nombre), y cuántos votos hay. Con 2 cuentas, count===2 == ambos.
+ */
+export async function getDeleteVotes(
+  mediaId: string
+): Promise<DeleteVotesState> {
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const me = user?.id ?? null;
+
+  const [{ data: profiles }, { data: votes }] = await Promise.all([
+    supabase.from("profiles").select("id, nombre"),
+    supabase.from("media_delete_votes").select("user_id").eq("media_id", mediaId),
+  ]);
+
+  const nombre = new Map<string, string>();
+  for (const p of profiles ?? []) {
+    nombre.set(p.id as string, (p.nombre as string) ?? "Tu pareja");
+  }
+
+  const voterIds = (votes ?? []).map((v) => v.user_id as string);
+  const votedByMe = !!me && voterIds.includes(me);
+  const partnerId = voterIds.find((id) => id !== me) ?? null;
+
+  return {
+    votedByMe,
+    partnerName: partnerId ? nombre.get(partnerId) ?? "Tu pareja" : null,
+    count: new Set(voterIds).size,
+  };
+}

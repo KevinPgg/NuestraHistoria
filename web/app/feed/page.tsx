@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { getFeed } from "@/lib/media";
 import { Header } from "@/components/Header";
+import { TabBar } from "@/components/TabBar";
 
 export const dynamic = "force-dynamic"; // URLs firmadas no se cachean
 
@@ -14,8 +15,18 @@ export default async function FeedPage() {
 
   return (
     <>
+      {/* Lavado cálido sutil: el mismo sol de Pareja y Cartas, filtrándose sobre
+          el fondo oscuro sin robarle protagonismo a las fotos. */}
+      <div
+        aria-hidden
+        className="pointer-events-none fixed inset-0 -z-10"
+        style={{
+          background:
+            "radial-gradient(900px 380px at 50% -8%, rgba(255,183,120,0.16), transparent 62%), radial-gradient(760px 520px at 108% 112%, rgba(244,114,182,0.12), transparent 60%)",
+        }}
+      />
       <Header />
-      <main className="mx-auto max-w-2xl px-4 py-6">
+      <main className="mx-auto max-w-2xl px-4 py-6 pb-24">
         {items.length === 0 ? (
           <p className="text-sm text-white/50">
             No hay fotos todavía. Corre el seed en Supabase.
@@ -52,6 +63,7 @@ export default async function FeedPage() {
           </div>
         )}
       </main>
+      <TabBar />
     </>
   );
 }

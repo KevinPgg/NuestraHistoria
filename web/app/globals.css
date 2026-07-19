@@ -21,3 +21,24 @@ body {
   background: var(--color-fondo);
   color: var(--color-texto);
 }
+
+/* Carta con estética de papel de líneas (recuperada de la v1). */
+.letter-paper {
+  background-color: #fffdf5;
+  background-image: linear-gradient(to bottom, transparent 31px, #cbd5e1 32px);
+  background-size: 100% 32px;
+  line-height: 32px;
+  font-family: var(--font-carta), cursive;
+  font-size: 1.35rem;
+  color: #374151;
+  border-radius: 0.5rem;
+  padding: 1.25rem 1.5rem;
+  box-shadow: inset 0 0 0 1px rgba(203, 213, 225, 0.4);
+}
+
+/* Dentro del papel, ninguna palabra lleva énfasis de color ni negrita. */
+.letter-paper strong,
+.letter-paper b {
+  font-weight: inherit;
+  color: inherit;
+}

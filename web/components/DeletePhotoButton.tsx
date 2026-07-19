@@ -1,28 +1,95 @@
 "use client";
-// Botón para eliminar una foto. Pide confirmación porque es irreversible
-// (borra la imagen del bucket y todos sus likes/comentarios en cascada).
-import { useTransition } from "react";
-import { deletePhoto } from "@/app/foto/[id]/actions";
+// Borrado por consenso: una foto solo se elimina cuando novio y novia votan.
+// Tres estados: sin votos (proponer), yo voté (esperando pareja / cancelar),
+// mi pareja votó (confirmar borrado definitivo).
+import { useState, useTransition } from "react";
+import { voteToDelete, cancelDeleteVote } from "@/app/foto/[id]/actions";
+import type { DeleteVotesState } from "@/lib/social";
 
-export function DeletePhotoButton({ mediaId }: { mediaId: string }) {
+export function DeletePhotoButton({
+  mediaId,
+  votes,
+}: {
+  mediaId: string;
+  votes: DeleteVotesState;
+}) {
   const [pending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
 
-  function onClick() {
-    const ok = window.confirm(
-      "¿Eliminar esta foto? Se borra para los dos, junto con sus likes y comentarios. No se puede deshacer."
-    );
-    if (!ok) return;
-    startTransition(() => deletePhoto(mediaId));
+  const partnerVoted = !!votes.partnerName; // la pareja ya votó
+  const iVoted = votes.votedByMe;
+
+  function propose() {
+    setError(null);
+    // Si mi pareja ya votó, este voto completa los 2 → borra. Confirmamos.
+    if (partnerVoted) {
+      const ok = window.confirm(
+        `${votes.partnerName} ya pidió eliminar esta foto. Si confirmas, se borra para los dos —con sus likes y comentarios— y no se puede deshacer.`
+      );
+      if (!ok) return;
+    }
+    startTransition(async () => {
+      const res = await voteToDelete(mediaId);
+      if (res?.error) setError(res.error);
+    });
   }
 
+  function cancel() {
+    setError(null);
+    startTransition(() => cancelDeleteVote(mediaId));
+  }
+
+  // Yo ya voté y espero a mi pareja.
+  if (iVoted && !partnerVoted) {
+    return (
+      <div className="flex flex-col items-end gap-1 text-right">
+        <span className="text-xs text-stone-500">
+          Pediste eliminar · esperando el voto de tu pareja
+        </span>
+        <button
+          type="button"
+          onClick={cancel}
+          disabled={pending}
+          className="text-xs text-stone-400 transition hover:text-stone-600 disabled:opacity-50"
+        >
+          {pending ? "…" : "Cancelar mi voto"}
+        </button>
+      </div>
+    );
+  }
+
+  // Mi pareja votó; falto yo para completar el borrado.
+  if (partnerVoted && !iVoted) {
+    return (
+      <div className="flex flex-col items-end gap-1 text-right">
+        <span className="text-xs text-stone-500">
+          {votes.partnerName} quiere eliminar esta foto
+        </span>
+        <button
+          type="button"
+          onClick={propose}
+          disabled={pending}
+          className="text-xs font-medium text-rose-500 transition hover:text-rose-600 disabled:opacity-50"
+        >
+          {pending ? "Eliminando…" : "Confirmar borrado"}
+        </button>
+        {error && <span className="text-xs text-rose-500">{error}</span>}
+      </div>
+    );
+  }
+
+  // Sin votos aún (o caso raro: ambos votados sin borrar todavía).
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={pending}
-      className="text-xs text-white/30 transition hover:text-rose-400 disabled:opacity-50"
-    >
-      {pending ? "Eliminando…" : "Eliminar foto"}
-    </button>
+    <div className="flex flex-col items-end gap-1 text-right">
+      <button
+        type="button"
+        onClick={propose}
+        disabled={pending}
+        className="text-xs text-stone-400 transition hover:text-rose-500 disabled:opacity-50"
+      >
+        {pending ? "…" : "Proponer eliminar"}
+      </button>
+      {error && <span className="text-xs text-rose-500">{error}</span>}
+    </div>
   );
 }

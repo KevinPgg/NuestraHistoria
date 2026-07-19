@@ -34,6 +34,30 @@ punto de retomada.
   por el adaptador de storage, inserta en `media` con fecha real elegida.
 - Eliminar foto desde `/foto/[id]` (con confirmación): borra fila + objetos del
   bucket; likes/comentarios se van por ON DELETE CASCADE.
+- Música Deezer por foto: buscador (proxy `/api/deezer`, resuelve CORS), preview
+  30s, colgar/cambiar/quitar (`music_tracks` + `media_music`). Una canción por foto.
+  Barra difuminada dentro de la foto + autoplay en loop.
+- Navegación inferior (TabBar): Inicio (feed) / Pareja / Cartas.
+- Sección Cartas (`/cartas`): hitos que se desbloquean por fecha desde 2025-05-30
+  (`lib/milestones.ts`); minijuegos portados a React como gate (6m→tostones,
+  12m→memory) antes de leer la carta. Tema Golden Hour.
+- Sección Pareja (`/pareja`): contador de días + acceso a los dos perfiles.
+- Perfil individual (`/perfil/[id]`): avatar circular editable (subir nueva o
+  elegir de tus fotos), stats (publicaciones/likes/comentarios recibidos), y feed
+  propio (grid de tus fotos). Subir foto desde el perfil alimenta el feed compartido.
+- Subida reutilizable: `UploadButton` (modal con `UploadForm`), usable en perfil y ajustes.
+- Foto en tamaño completo (lightbox), barra de música transparente con bordes
+  difuminados, y autoplay que re-resuelve el preview de Deezer (arregla canciones
+  viejas que no sonaban por URL caducada).
+
+## Pendiente grande (fases siguientes)
+- **Fase B — Post view**: subir 1 foto / varias (canción global o por foto) / video
+  ≤30s. Requiere decidir modelo (reusar `momentos` o tabla `posts`), refactor del
+  feed a "posts", y camino de subida directa cliente→bucket para videos (pesan más
+  que el límite de Server Actions).
+- **Fase C — Historias**: efímeras 24h con textos sobre la foto + música. Requiere
+  tabla con `expires_at` + job de limpieza automática (cron). "Efímero" = se borra
+  solo, no "no se guarda".
 - Header con identidad por usuario (novio azul / novia rosa) + link a Ajustes + logout.
 - BD completa con RLS; scripts en `supabase/` (schema, seed, storage, profiles-setup).
 
@@ -52,8 +76,8 @@ npm run dev   # http://localhost:3000
    RLS **ya existían** (lectura autenticados, escritura solo propia); implementados
    con server actions + UI. Subir/eliminar fotos = feature aparte (ver
    PLANIFICACION §7).
-2. **Música Deezer** — buscador + reproductor preview 30s; "colgar" pista a foto
-   (`media_music`, cache en `music_tracks`). Más aislado; puede esperar.
+2. **Música Deezer** — ✅ hecho (foto individual). Pendiente futuro: música en
+   Momentos (`media_music.momento_id` ya soportado).
 3. **Momentos/recuerdos** — slideshow + selector; visibilidad public/private (RLS ya modelada).
 4. **Favoritas top-N** — `user_settings.favoritas_count` (10..30, paso 5).
 5. **Editar descripción con historial** — `media_desc_history`, razón ≤150 chars.

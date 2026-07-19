@@ -75,7 +75,7 @@ export function UploadForm() {
           type="file"
           accept="image/*"
           onChange={onPick}
-          className="block w-full text-sm text-white/70 file:mr-3 file:rounded-full file:border-0 file:bg-white/90 file:px-4 file:py-1.5 file:text-sm file:font-medium file:text-black hover:file:bg-white"
+          className="block w-full text-sm text-stone-600 file:mr-3 file:rounded-full file:border-0 file:bg-gradient-to-br file:from-amber-400 file:to-rose-400 file:px-4 file:py-1.5 file:text-sm file:font-medium file:text-white hover:file:brightness-105"
         />
       </div>
 
@@ -84,24 +84,26 @@ export function UploadForm() {
         <img
           src={preview}
           alt="Vista previa"
-          className="max-h-64 w-full rounded-xl object-contain bg-white/5"
+          className="max-h-64 w-full rounded-xl object-contain bg-black/5"
         />
       )}
 
       <div>
-        <label className="mb-1 block text-xs text-white/50">Descripción</label>
+        <label className="mb-1 block text-xs font-medium text-stone-500">
+          Descripción
+        </label>
         <textarea
           value={descripcion}
           onChange={(e) => setDescripcion(e.target.value)}
           rows={2}
           maxLength={500}
           placeholder="¿Qué momento es este?"
-          className="w-full resize-none rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/30 focus:border-white/30 focus:outline-none"
+          className="w-full resize-none rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm text-stone-800 placeholder:text-stone-400 focus:border-rose-300 focus:outline-none focus:ring-2 focus:ring-rose-200"
         />
       </div>
 
       <div>
-        <label className="mb-1 block text-xs text-white/50">
+        <label className="mb-1 block text-xs font-medium text-stone-500">
           Fecha real de la foto
         </label>
         <input
@@ -109,17 +111,17 @@ export function UploadForm() {
           value={fecha}
           max={hoy()}
           onChange={(e) => setFecha(e.target.value)}
-          className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:border-white/30 focus:outline-none"
+          className="rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm text-stone-800 focus:border-rose-300 focus:outline-none focus:ring-2 focus:ring-rose-200"
         />
       </div>
 
-      {error && <p className="text-sm text-rose-400">{error}</p>}
-      {okMsg && <p className="text-sm text-emerald-400">{okMsg}</p>}
+      {error && <p className="text-sm text-rose-600">{error}</p>}
+      {okMsg && <p className="text-sm text-emerald-600">{okMsg}</p>}
 
       <button
         type="submit"
         disabled={pending || !file}
-        className="rounded-full bg-white/90 px-5 py-2 text-sm font-medium text-black transition hover:bg-white disabled:opacity-40"
+        className="rounded-full bg-gradient-to-br from-amber-400 to-rose-400 px-5 py-2 text-sm font-medium text-white shadow-sm transition hover:brightness-105 disabled:opacity-40"
       >
         {pending ? "Subiendo…" : "Subir foto"}
       </button>

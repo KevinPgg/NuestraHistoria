@@ -1,6 +1,5 @@
 "use client";
-// Botón de "me encanta" con feedback optimista. La verdad vive en la BD; aquí
-// sólo adelantamos el cambio visual mientras la server action confirma.
+// Botón de "me encanta" con feedback optimista (paleta Golden Hour).
 import { useEffect, useState, useTransition } from "react";
 import { toggleLike } from "@/app/foto/[id]/actions";
 
@@ -11,16 +10,21 @@ export function LikeButton({
 }: {
   mediaId: string;
   likedByMe: boolean;
-  otherLikers: string[]; // nombres de quienes dieron like y no soy yo
+  otherLikers: string[];
 }) {
   const [liked, setLiked] = useState(likedByMe);
+  const [burst, setBurst] = useState(false);
   const [pending, startTransition] = useTransition();
 
-  // Re-sincroniza con el servidor tras revalidar.
   useEffect(() => setLiked(likedByMe), [likedByMe]);
 
   function onClick() {
-    setLiked((v) => !v); // optimista
+    const next = !liked;
+    setLiked(next);
+    if (next) {
+      setBurst(true);
+      setTimeout(() => setBurst(false), 350);
+    }
     startTransition(() => toggleLike(mediaId));
   }
 
@@ -34,17 +38,17 @@ export function LikeButton({
         disabled={pending}
         aria-pressed={liked}
         aria-label={liked ? "Quitar me encanta" : "Me encanta"}
-        className="transition active:scale-90 disabled:opacity-60"
+        className={`transition disabled:opacity-60 ${burst ? "scale-125" : "active:scale-90"}`}
       >
         <svg
           viewBox="0 0 24 24"
-          className={`h-7 w-7 ${liked ? "fill-rose-500 stroke-rose-500" : "fill-none stroke-white/60"}`}
-          strokeWidth={2}
+          className={`h-8 w-8 drop-shadow-sm ${liked ? "fill-rose-500 stroke-rose-500" : "fill-white/40 stroke-stone-500"}`}
+          strokeWidth={1.8}
         >
           <path d="M12 21s-7.5-4.9-9.7-9.2C.9 8.9 2.2 5.5 5.4 5.1c1.9-.2 3.6.9 4.6 2.3.9-1.4 2.6-2.5 4.6-2.3 3.2.4 4.5 3.8 3.1 6.7C19.5 16.1 12 21 12 21z" />
         </svg>
       </button>
-      {label && <span className="text-sm text-white/70">{label}</span>}
+      {label && <span className="text-sm text-stone-600">{label}</span>}
     </div>
   );
 }

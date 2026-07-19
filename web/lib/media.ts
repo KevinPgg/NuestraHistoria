@@ -51,9 +51,67 @@ export async function getFeed(
   }));
 }
 
+/** Fotos de un usuario (su feed propio), con thumbs firmados. */
+export async function getUserMedia(
+  ownerId: string,
+  limit = 60
+): Promise<MediaWithUrls[]> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("media")
+    .select(
+      "id, tipo, storage_path, thumb_path, filename_original, descripcion, fecha_mostrada"
+    )
+    .eq("owner_id", ownerId)
+    .order("fecha_mostrada", { ascending: false })
+    .range(0, limit - 1);
+
+  if (error) throw error;
+  const rows = (data ?? []) as MediaRow[];
+  const thumbKeys = rows
+    .map((r) => r.thumb_path)
+    .filter((k): k is string => !!k);
+  const signed = await storage.getUrls(thumbKeys);
+  return rows.map((r) => ({
+    ...r,
+    thumbUrl: r.thumb_path ? signed[r.thumb_path] ?? null : null,
+  }));
+}
+
 /** URL firmada de la imagen a tamaño completo (al abrir una foto). */
 export async function getFullUrl(storagePath: string): Promise<string> {
   return storage.getUrl(storagePath);
+}
+
+/**
+ * Thumbs firmados de fotos para el minijuego Memory. Trae un lote y lo baraja,
+ * para que cada partida use fotos distintas. Devuelve solo las URLs (barajadas).
+ */
+export async function getGamePhotos(pool = 40): Promise<string[]> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("media")
+    .select("thumb_path")
+    .eq("tipo", "photo")
+    .not("thumb_path", "is", null)
+    .limit(pool);
+
+  if (error) throw error;
+  const keys = (data ?? [])
+    .map((r) => (r as { thumb_path: string | null }).thumb_path)
+    .filter((k): k is string => !!k);
+
+  const signed = await storage.getUrls(keys);
+  const urls = keys
+    .map((k) => signed[k])
+    .filter((u): u is string => !!u);
+
+  // Barajar (Fisher-Yates) para variar las fotos entre partidas.
+  for (let i = urls.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [urls[i], urls[j]] = [urls[j], urls[i]];
+  }
+  return urls;
 }
 
 /**

@@ -23,8 +23,8 @@ export default function AjustesPage() {
           subir.
         </p>
 
-        <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-          <h2 className="mb-3 text-sm font-semibold text-white/70">
+        <section className="rounded-2xl border border-stone-200 bg-[#fffaf3] p-4 shadow-lg">
+          <h2 className="mb-3 text-sm font-semibold text-stone-700">
             Subir foto
           </h2>
           <UploadForm />
