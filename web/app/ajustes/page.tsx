@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { Header } from "@/components/Header";
 import { UploadForm } from "@/components/UploadForm";
+import { PasskeyManager } from "@/components/PasskeyManager";
 
 export const dynamic = "force-dynamic";
 
@@ -28,6 +29,17 @@ export default function AjustesPage() {
             Subir foto
           </h2>
           <UploadForm />
+        </section>
+
+        <section className="mt-6 rounded-2xl border border-stone-200 bg-[#fffaf3] p-4 shadow-lg">
+          <h2 className="mb-1 text-sm font-semibold text-stone-700">
+            Acceso rápido (huella / Face ID)
+          </h2>
+          <p className="mb-3 text-xs text-stone-500">
+            Registra este dispositivo para entrar sin escribir la contraseña. La
+            contraseña sigue funcionando como respaldo.
+          </p>
+          <PasskeyManager />
         </section>
       </main>
     </>

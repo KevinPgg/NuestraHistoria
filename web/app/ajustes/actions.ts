@@ -7,7 +7,7 @@ import { storage } from "@/lib/storage";
 
 export async function uploadPhoto(
   formData: FormData
-): Promise<{ error?: string; ok?: boolean }> {
+): Promise<{ error?: string; ok?: boolean; mediaId?: string }> {
   const supabase = createClient();
   const {
     data: { user },
@@ -43,24 +43,30 @@ export async function uploadPhoto(
     return { error: "No se pudo subir la imagen al almacenamiento." };
   }
 
-  const { error } = await supabase.from("media").insert({
-    owner_id: user.id,
-    tipo: "photo",
-    storage_path,
-    thumb_path,
-    filename_original: slug,
-    descripcion,
-    fecha_creacion: fechaIso,
-    fecha_modificacion: fechaIso,
-    fecha_mostrada: fechaIso,
-  });
+  const { data: media, error } = await supabase
+    .from("media")
+    .insert({
+      owner_id: user.id,
+      tipo: "photo",
+      storage_path,
+      thumb_path,
+      filename_original: slug,
+      descripcion,
+      fecha_creacion: fechaIso,
+      fecha_modificacion: fechaIso,
+      fecha_mostrada: fechaIso,
+    })
+    .select("id")
+    .single();
 
-  if (error) {
+  if (error || !media) {
     // Rollback: si la fila no se guardó, no dejamos archivos huérfanos.
     await storage.remove([storage_path, thumb_path]).catch(() => {});
     return { error: "No se pudo guardar la foto en la base." };
   }
 
+  // Subir = agregar al POOL compartido (media). Los posts se arman aparte desde
+  // el perfil (eligiendo del pool). No creamos post ni tocamos el perfil aquí.
   revalidatePath("/feed");
-  return { ok: true };
+  return { ok: true, mediaId: media.id as string };
 }

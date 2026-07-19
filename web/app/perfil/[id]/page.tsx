@@ -2,9 +2,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getProfileById, getUserStats, getCurrentUserId } from "@/lib/profiles";
-import { getUserMedia } from "@/lib/media";
+import { getFeed } from "@/lib/media";
+import { getUserPosts } from "@/lib/posts";
+import { getUserHighlights } from "@/lib/highlights";
 import { AvatarEditor } from "@/components/AvatarEditor";
-import { UploadButton } from "@/components/UploadButton";
+import { CreatePost } from "@/components/CreatePost";
+import { HighlightsBar } from "@/components/HighlightsBar";
 import { TabBar } from "@/components/TabBar";
 
 export const dynamic = "force-dynamic";
@@ -25,19 +28,25 @@ export default async function PerfilPage({
   const profile = await getProfileById(params.id);
   if (!profile) notFound();
 
-  const [stats, media, meId] = await Promise.all([
+  const [stats, posts, meId, highlights, pool] = await Promise.all([
     getUserStats(profile.id),
-    getUserMedia(profile.id),
+    getUserPosts(profile.id), // el perfil = tus posts
     getCurrentUserId(),
+    getUserHighlights(profile.id),
+    getFeed(1000, 0), // el pool compartido, para los selectores
   ]);
   const isSelf = meId === profile.id;
   const ring = profile.rol ? RING[profile.rol] : "ring-white/60";
 
-  const pickPhotos = media.map((m) => ({
+  // El avatar puede salir de cualquier foto del pool compartido.
+  const pickPhotos = pool.map((m) => ({
     id: m.id,
     storagePath: m.storage_path,
     thumbUrl: m.thumbUrl,
   }));
+
+  // Selectores (crear post y destacados) eligen del pool completo.
+  const poolPickPhotos = pool.map((m) => ({ id: m.id, thumbUrl: m.thumbUrl }));
 
   return (
     <div className="relative min-h-screen pb-24 text-stone-800">
@@ -81,7 +90,6 @@ export default async function PerfilPage({
           {isSelf && (
             <div className="mt-3 flex items-center gap-2">
               <AvatarEditor photos={pickPhotos} />
-              <UploadButton />
             </div>
           )}
         </section>
@@ -89,32 +97,56 @@ export default async function PerfilPage({
         {/* Contadores */}
         <section className="mt-6 grid grid-cols-3 gap-2 rounded-2xl border border-white/50 bg-white/45 p-4 text-center backdrop-blur">
           <Stat n={stats.posts} label="Publicaciones" />
-          <Stat n={stats.likes} label="Me encanta" />
+          <Stat n={stats.likes} label="Reacciones" />
           <Stat n={stats.comments} label="Comentarios" />
         </section>
 
-        {/* Feed propio */}
+        {/* Destacados (burbujas) */}
+        <HighlightsBar
+          highlights={highlights}
+          isSelf={isSelf}
+          pickPhotos={poolPickPhotos}
+        />
+
+        {/* Mi feed = posts del usuario */}
         <section className="mt-6">
-          {media.length === 0 ? (
-            <p className="text-center text-sm text-stone-500">
-              Todavía no hay publicaciones.
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-stone-600">
+              {isSelf ? "Mi feed" : "Publicaciones"}
+            </h2>
+            {isSelf && <CreatePost poolPhotos={poolPickPhotos} />}
+          </div>
+
+          {posts.length === 0 ? (
+            <p className="rounded-2xl border border-white/50 bg-white/50 p-6 text-center text-sm text-stone-600 backdrop-blur">
+              {isSelf
+                ? "Todavía no tienes posts. Toca “Crear post” para armar uno con fotos del pool."
+                : "Este perfil todavía no tiene posts."}
             </p>
           ) : (
             <div className="grid grid-cols-3 gap-1 sm:gap-2">
-              {media.map((m) => (
+              {posts.map((p) => (
                 <Link
-                  key={m.id}
-                  href={`/foto/${m.id}`}
+                  key={p.id}
+                  href={`/post/${p.id}`}
                   className="relative aspect-square overflow-hidden rounded-lg bg-white/40"
                 >
-                  {m.thumbUrl && (
+                  {p.coverThumbUrl && (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
-                      src={m.thumbUrl}
-                      alt={m.descripcion ?? ""}
+                      src={p.coverThumbUrl}
+                      alt={p.descripcion ?? ""}
                       className="h-full w-full object-cover"
                       loading="lazy"
                     />
+                  )}
+                  {p.mediaCount > 1 && (
+                    <span
+                      aria-label={`Álbum de ${p.mediaCount} fotos`}
+                      className="absolute right-1.5 top-1.5 text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]"
+                    >
+                      <AlbumIcon />
+                    </span>
                   )}
                 </Link>
               ))}
@@ -134,5 +166,25 @@ function Stat({ n, label }: { n: number; label: string }) {
       <p className="text-xl font-bold text-rose-500">{n}</p>
       <p className="text-[11px] text-stone-500">{label}</p>
     </div>
+  );
+}
+
+// Ícono de "varias fotos" (dos tarjetas apiladas).
+function AlbumIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-5 w-5 fill-current">
+      <rect x="7.5" y="3.5" width="13" height="13" rx="3" opacity="0.55" />
+      <rect
+        x="3.5"
+        y="7.5"
+        width="13"
+        height="13"
+        rx="3"
+        stroke="currentColor"
+        strokeWidth="2"
+        fill="white"
+        fillOpacity="0.25"
+      />
+    </svg>
   );
 }

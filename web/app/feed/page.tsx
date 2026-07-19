@@ -1,22 +1,18 @@
-// Feed inicial: lee la BD y muestra las fotos con miniaturas firmadas.
-// Server Component: la resolución de URLs firmadas ocurre en el servidor.
+// Inicio = el POOL compartido: todas las fotos sueltas de los dos. Aquí se sube
+// al pool; los posts (carruseles) se arman desde el perfil eligiendo de aquí.
 import Link from "next/link";
 import { getFeed } from "@/lib/media";
 import { Header } from "@/components/Header";
+import { UploadButton } from "@/components/UploadButton";
 import { TabBar } from "@/components/TabBar";
 
 export const dynamic = "force-dynamic"; // URLs firmadas no se cachean
 
 export default async function FeedPage() {
-  // A esta escala (122) cargamos todo de una con lazy load nativo en las <img>.
-  // Cuando el acervo crezca a varios cientos, migrar a paginación por cursor.
   const items = await getFeed(500, 0);
-  const conImagen = items.filter((m) => m.thumbUrl).length;
 
   return (
     <>
-      {/* Lavado cálido sutil: el mismo sol de Pareja y Cartas, filtrándose sobre
-          el fondo oscuro sin robarle protagonismo a las fotos. */}
       <div
         aria-hidden
         className="pointer-events-none fixed inset-0 -z-10"
@@ -27,16 +23,22 @@ export default async function FeedPage() {
       />
       <Header />
       <main className="mx-auto max-w-2xl px-4 py-6 pb-24">
+        <div className="mb-4 flex items-center justify-between gap-2">
+          <div>
+            <h1 className="text-base font-semibold text-white/90">
+              Pool compartido
+            </h1>
+            <p className="text-xs text-white/40">
+              Todas nuestras fotos. Sube aquí; arma tus posts desde tu perfil.
+            </p>
+          </div>
+          <UploadButton label="Subir foto" />
+        </div>
+
         {items.length === 0 ? (
           <p className="text-sm text-white/50">
-            No hay fotos todavía. Corre el seed en Supabase.
+            No hay fotos todavía. Sube la primera.
           </p>
-        ) : conImagen === 0 ? (
-          <div className="rounded-xl border border-amber-400/20 bg-amber-500/10 p-4 text-sm text-amber-200">
-            Hay {items.length} fotos en la base, pero ninguna miniatura se pudo
-            cargar. Falta subir los archivos al bucket <code>media</code> en la
-            carpeta <code>thumbs/</code>, o aplicar <code>storage.sql</code>.
-          </div>
         ) : (
           <div className="grid grid-cols-3 gap-1 sm:gap-2">
             {items.map((m) => (

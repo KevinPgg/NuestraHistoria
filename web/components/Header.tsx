@@ -29,17 +29,36 @@ export async function Header() {
           >
             Ajustes
           </Link>
-          <div className="flex items-center gap-2">
-            <span
-              className={`flex h-8 w-8 items-center justify-center rounded-full border text-xs font-semibold ${accent}`}
+          {profile?.id ? (
+            <Link
+              href={`/perfil/${profile.id}`}
+              aria-label="Ir a mi perfil"
+              className="flex items-center gap-2 rounded-full transition hover:opacity-80"
             >
-              {inicial}
-            </span>
-            <div className="leading-tight">
-              <p className="text-sm">{nombre}</p>
-              {rol && <p className="text-[11px] capitalize text-white/40">{rol}</p>}
+              <span
+                className={`flex h-8 w-8 items-center justify-center rounded-full border text-xs font-semibold ${accent}`}
+              >
+                {inicial}
+              </span>
+              <div className="leading-tight">
+                <p className="text-sm">{nombre}</p>
+                {rol && (
+                  <p className="text-[11px] capitalize text-white/40">{rol}</p>
+                )}
+              </div>
+            </Link>
+          ) : (
+            <div className="flex items-center gap-2">
+              <span
+                className={`flex h-8 w-8 items-center justify-center rounded-full border text-xs font-semibold ${accent}`}
+              >
+                {inicial}
+              </span>
+              <div className="leading-tight">
+                <p className="text-sm">{nombre}</p>
+              </div>
             </div>
-          </div>
+          )}
           <LogoutButton />
         </div>
       </div>

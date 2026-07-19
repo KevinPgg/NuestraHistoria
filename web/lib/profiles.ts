@@ -65,28 +65,31 @@ export async function getProfileById(id: string): Promise<ProfileCard | null> {
   };
 }
 
-/** Contadores del perfil: publicaciones, likes y comentarios recibidos. */
+/**
+ * Contadores del perfil: publicaciones (posts del usuario), y likes/comentarios
+ * recibidos sobre esos posts.
+ */
 export async function getUserStats(ownerId: string): Promise<UserStats> {
   const supabase = createClient();
 
-  const { data: mediaRows } = await supabase
-    .from("media")
+  const { data: postRows } = await supabase
+    .from("posts")
     .select("id")
-    .eq("owner_id", ownerId);
-  const ids = (mediaRows ?? []).map((m) => m.id as string);
+    .eq("author_id", ownerId);
+  const ids = (postRows ?? []).map((p) => p.id as string);
 
   const posts = ids.length;
   if (posts === 0) return { posts: 0, likes: 0, comments: 0 };
 
   const [{ count: likes }, { count: comments }] = await Promise.all([
     supabase
-      .from("likes")
+      .from("post_reactions")
       .select("id", { count: "exact", head: true })
-      .in("media_id", ids),
+      .in("post_id", ids),
     supabase
-      .from("comments")
+      .from("post_comments")
       .select("id", { count: "exact", head: true })
-      .in("media_id", ids),
+      .in("post_id", ids),
   ]);
 
   return { posts, likes: likes ?? 0, comments: comments ?? 0 };

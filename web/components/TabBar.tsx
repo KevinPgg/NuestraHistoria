@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation";
 
 const TABS = [
   { href: "/feed", label: "Inicio", icon: HomeIcon },
-  { href: "/destacados", label: "Destacados", icon: StarIcon },
   { href: "/pareja", label: "Pareja", icon: HeartIcon },
   { href: "/cartas", label: "Cartas", icon: MailIcon },
 ];
@@ -41,13 +40,6 @@ function HomeIcon({ filled }: { filled?: boolean }) {
   return (
     <svg viewBox="0 0 24 24" className={`h-6 w-6 ${filled ? "fill-current" : "fill-none stroke-current"}`} strokeWidth={2}>
       <path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" />
-    </svg>
-  );
-}
-function StarIcon({ filled }: { filled?: boolean }) {
-  return (
-    <svg viewBox="0 0 24 24" className={`h-6 w-6 ${filled ? "fill-current" : "fill-none stroke-current"}`} strokeWidth={2} strokeLinejoin="round">
-      <path d="M12 3l2.7 5.5 6.1.9-4.4 4.3 1 6L12 17l-5.4 2.8 1-6L3.2 9.4l6.1-.9z" />
     </svg>
   );
 }

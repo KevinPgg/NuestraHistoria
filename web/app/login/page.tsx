@@ -10,6 +10,28 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [passkeyLoading, setPasskeyLoading] = useState(false);
+
+  async function onPasskey() {
+    setError(null);
+    setPasskeyLoading(true);
+    const supabase = createClient();
+    // signInWithPasskey usa credenciales "discoverable": el propio dispositivo
+    // resuelve la cuenta, sin pedir correo. API experimental aún sin tipos → cast.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (supabase.auth as any).signInWithPasskey();
+    setPasskeyLoading(false);
+    if (error) {
+      const msg = error.message?.toLowerCase() ?? "";
+      if (msg.includes("cancel") || error.name === "NotAllowedError") return; // usuario canceló
+      setError(
+        "No se pudo entrar con biométrico. Usa tu correo y contraseña, y registra la huella desde Ajustes."
+      );
+      return;
+    }
+    router.push("/feed");
+    router.refresh();
+  }
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -70,9 +92,22 @@ export default function LoginPage() {
           </button>
         </form>
 
+        <div className="my-5 flex items-center gap-3 text-[11px] uppercase tracking-wide text-white/30">
+          <span className="h-px flex-1 bg-white/10" />o<span className="h-px flex-1 bg-white/10" />
+        </div>
+
+        <button
+          type="button"
+          onClick={onPasskey}
+          disabled={passkeyLoading}
+          className="flex w-full items-center justify-center gap-2 rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-sm font-medium text-white/90 transition hover:border-white/30 disabled:opacity-50"
+        >
+          <span aria-hidden>🔑</span>
+          {passkeyLoading ? "Esperando…" : "Entrar con huella / Face ID"}
+        </button>
+
         <p className="mt-6 text-xs text-white/40">
-          Passkey (Face ID / huella) se habilitará como acceso rápido una vez
-          validado. Ver README.
+          Registra tu huella / Face ID desde Ajustes (una vez que hayas entrado).
         </p>
       </div>
     </main>

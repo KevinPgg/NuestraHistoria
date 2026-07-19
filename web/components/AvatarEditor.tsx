@@ -84,7 +84,7 @@ export function AvatarEditor({ photos }: { photos: PickPhoto[] }) {
                 onClick={() => setTab("elegir")}
                 className={`rounded-full px-3 py-1 text-sm ${tab === "elegir" ? "bg-rose-400 text-white" : "text-stone-600"}`}
               >
-                Elegir de mis fotos
+                Elegir del pool
               </button>
               <button
                 type="button"
@@ -110,7 +110,7 @@ export function AvatarEditor({ photos }: { photos: PickPhoto[] }) {
               </label>
             ) : photos.length === 0 ? (
               <p className="py-8 text-center text-sm text-stone-500">
-                Todavía no tienes fotos subidas.
+                El pool está vacío todavía.
               </p>
             ) : (
               <div className="grid grid-cols-3 gap-2">

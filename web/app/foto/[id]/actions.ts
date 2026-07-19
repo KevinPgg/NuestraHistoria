@@ -8,65 +8,6 @@ import { storage } from "@/lib/storage";
 import type { DeezerTrack } from "@/lib/deezer";
 
 const MAX_COMENTARIO = 1000;
-const DEFAULT_FAV_LIMIT = 10;
-
-/**
- * Alterna una foto como destacada (favorita) del usuario en sesión. Respeta el
- * tope favoritas_count: si ya está lleno e intento agregar, devuelve error.
- */
-export async function toggleFavorite(
-  mediaId: string
-): Promise<{ error?: string; isFavorite?: boolean }> {
-  const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { error: "Sin sesión." };
-
-  const { data: existing } = await supabase
-    .from("favorites")
-    .select("id")
-    .eq("user_id", user.id)
-    .eq("media_id", mediaId)
-    .maybeSingle();
-
-  if (existing) {
-    await supabase.from("favorites").delete().eq("id", existing.id);
-    revalidatePath(`/foto/${mediaId}`);
-    revalidatePath("/destacados");
-    return { isFavorite: false };
-  }
-
-  // Voy a agregar: verificar el tope.
-  const [{ count }, { data: settings }] = await Promise.all([
-    supabase
-      .from("favorites")
-      .select("id", { count: "exact", head: true })
-      .eq("user_id", user.id),
-    supabase
-      .from("user_settings")
-      .select("favoritas_count")
-      .eq("user_id", user.id)
-      .maybeSingle(),
-  ]);
-
-  const limit =
-    (settings?.favoritas_count as number | undefined) ?? DEFAULT_FAV_LIMIT;
-  if ((count ?? 0) >= limit) {
-    return {
-      error: `Ya tienes ${limit} destacadas (tu tope). Quita una para agregar otra.`,
-    };
-  }
-
-  const { error } = await supabase
-    .from("favorites")
-    .insert({ user_id: user.id, media_id: mediaId });
-  if (error) return { error: "No se pudo destacar la foto." };
-
-  revalidatePath(`/foto/${mediaId}`);
-  revalidatePath("/destacados");
-  return { isFavorite: true };
-}
 
 /** Alterna mi like sobre una foto (insert si no existe, delete si existe). */
 export async function toggleLike(mediaId: string): Promise<void> {

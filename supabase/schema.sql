@@ -111,17 +111,34 @@ create table if not exists public.favorites (
   unique (user_id, media_id)
 );
 
+-- Perfil = selección curada del pool. Ver supabase/perfil-seleccion-pool.sql.
+create table if not exists public.profile_media (
+  user_id    uuid not null references public.profiles(id) on delete cascade,
+  media_id   uuid not null references public.media(id) on delete cascade,
+  orden      int not null default 0,
+  created_at timestamptz default now(),
+  primary key (user_id, media_id)
+);
+create index if not exists profile_media_user_orden_idx
+  on public.profile_media (user_id, orden, created_at desc);
+
 -- =============================================================
 -- 4. MOMENTOS / RECUERDOS  +  MÚSICA (Deezer)
 -- =============================================================
 
+-- momentos = "destacados" (historias destacadas). Cada uno es una burbuja de un
+-- usuario con portada y orden. Ver supabase/destacados-momentos.sql.
 create table if not exists public.momentos (
-  id          uuid primary key default gen_random_uuid(),
-  owner_id    uuid not null references public.profiles(id) on delete cascade,
-  titulo      text,
-  visibilidad text not null default 'private' check (visibilidad in ('public','private')),
-  created_at  timestamptz default now()
+  id             uuid primary key default gen_random_uuid(),
+  owner_id       uuid not null references public.profiles(id) on delete cascade,
+  titulo         text,
+  visibilidad    text not null default 'private' check (visibilidad in ('public','private')),
+  cover_media_id uuid references public.media(id) on delete set null,
+  orden          int not null default 0,
+  created_at     timestamptz default now()
 );
+create index if not exists momentos_owner_orden_idx
+  on public.momentos (owner_id, orden, created_at desc);
 
 create table if not exists public.momento_media (
   momento_id uuid not null references public.momentos(id) on delete cascade,
@@ -218,6 +235,13 @@ create policy "comentarios propios" on public.comments
   for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
 create policy "favoritas propias" on public.favorites
+  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+-- Selección de perfil: la pareja ve ambos; cada quien edita el suyo
+alter table public.profile_media enable row level security;
+create policy "profile_media lectura pareja" on public.profile_media
+  for select using (auth.role() = 'authenticated');
+create policy "profile_media propia" on public.profile_media
   for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
 -- Momentos: ves los tuyos siempre; los del otro solo si son 'public'

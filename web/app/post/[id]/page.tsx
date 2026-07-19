@@ -1,17 +1,16 @@
-// Vista de foto individual — tema "Golden Hour" (cálido), autocontenida.
-// No usa el Header global oscuro: trae su propia barra cálida para no chocar con
-// el fondo. Server Component: firma y lectura respetan RLS.
+// Vista de un post — tema "Golden Hour". Carrusel de fotos + social a nivel post.
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getMediaById } from "@/lib/media";
-import { getPhotoSocial, getDeleteVotes } from "@/lib/social";
-import { getPhotoTrack } from "@/lib/music";
-import { LikeButton } from "@/components/LikeButton";
-import { CommentForm } from "@/components/CommentForm";
-import { DeletePhotoButton } from "@/components/DeletePhotoButton";
-import { PhotoMusic } from "@/components/PhotoMusic";
-import { PhotoViewer } from "@/components/PhotoViewer";
-import { deleteComment } from "./actions";
+import { getPostDetail } from "@/lib/posts";
+import { getPostSocial } from "@/lib/postSocial";
+import { getPostReactions } from "@/lib/reactions";
+import { getPostTrack } from "@/lib/postMusic";
+import { PostCarousel } from "@/components/PostCarousel";
+import { PostMusicBar } from "@/components/PostMusicBar";
+import { PostReactions } from "@/components/PostReactions";
+import { PostCommentForm } from "@/components/PostCommentForm";
+import { PostDeleteButton } from "@/components/PostDeleteButton";
+import { deletePostComment } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -46,26 +45,25 @@ const ROL_COLOR: Record<string, string> = {
   novia: "text-rose-500",
 };
 
-export default async function FotoPage({
+export default async function PostPage({
   params,
 }: {
   params: { id: string };
 }) {
-  const media = await getMediaById(params.id);
-  if (!media) notFound();
+  const post = await getPostDetail(params.id);
+  if (!post) notFound();
 
-  const social = await getPhotoSocial(media.id);
-  const deleteVotes = await getDeleteVotes(media.id);
-  const track = await getPhotoTrack(media.id);
-  const fecha = formatFecha(media.fecha_mostrada);
-  const alt = media.descripcion ?? media.filename_original ?? "Foto";
-  const otherLikers = social.likers
-    .filter((l) => l.user_id !== social.me)
-    .map((l) => l.nombre);
+  const [social, reactions, track] = await Promise.all([
+    getPostSocial(post.id),
+    getPostReactions(post.id),
+    getPostTrack(post.id),
+  ]);
+  const isAuthor = !!social.me && social.me === post.authorId;
+
+  const fecha = formatFecha(post.fecha_mostrada);
 
   return (
     <div className="relative min-h-screen text-stone-800">
-      {/* Fondo Golden Hour + brillo cálido */}
       <div className="fixed inset-0 -z-10" style={{ background: GOLDEN }} />
       <div
         className="pointer-events-none fixed inset-0 -z-10"
@@ -75,11 +73,10 @@ export default async function FotoPage({
         }}
       />
 
-      {/* Barra cálida propia */}
       <header className="sticky top-0 z-10 border-b border-white/40 bg-white/30 backdrop-blur">
         <div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-3">
           <Link
-            href="/feed"
+            href={post.authorId ? `/perfil/${post.authorId}` : "/feed"}
             className="inline-flex items-center gap-1 text-sm font-medium text-stone-700 transition hover:text-stone-900"
           >
             <span aria-hidden>←</span> Volver
@@ -91,43 +88,25 @@ export default async function FotoPage({
       </header>
 
       <main className="mx-auto max-w-2xl px-4 py-6">
-        {/* Foto */}
-        <figure className="overflow-hidden rounded-3xl bg-white/60 p-1.5 shadow-[0_18px_50px_-12px_rgba(244,114,182,0.45)] ring-1 ring-white/50">
-          <div className="relative overflow-hidden rounded-2xl">
-          {media.fullUrl ? (
-            media.tipo === "video" ? (
-              // eslint-disable-next-line jsx-a11y/media-has-caption
-              <video
-                src={media.fullUrl}
-                controls
-                className="max-h-[70vh] w-full rounded-2xl bg-black object-contain"
-              />
-            ) : (
-              <PhotoViewer src={media.fullUrl} alt={alt} />
-            )
-          ) : (
-            <div className="flex aspect-square items-center justify-center rounded-2xl text-sm text-stone-500">
-              No se pudo cargar la imagen
-            </div>
-          )}
-            <PhotoMusic mediaId={media.id} track={track} />
-          </div>
-        </figure>
+        <PostCarousel slides={post.slides} />
 
-        {/* Likes */}
-        <div className="mt-4 flex items-start justify-between gap-4">
-          <LikeButton
-            mediaId={media.id}
-            likedByMe={social.likedByMe}
-            otherLikers={otherLikers}
+        {/* Música del post (solo reproducción; se elige al crear) */}
+        <PostMusicBar track={track} />
+
+        {/* Reacciones (sin límite) */}
+        <div className="mt-4">
+          <PostReactions
+            postId={post.id}
+            initialCounts={reactions.counts}
+            initialMyCount={reactions.myCount}
           />
         </div>
 
         {/* Descripción + fecha */}
         <div className="mt-4 space-y-2">
-          {media.descripcion && (
+          {post.descripcion && (
             <p className="whitespace-pre-line text-[15px] leading-relaxed text-stone-700">
-              {media.descripcion}
+              {post.descripcion}
             </p>
           )}
           {fecha && (
@@ -172,7 +151,7 @@ export default async function FotoPage({
                     </p>
                   </div>
                   {c.mine && (
-                    <form action={deleteComment.bind(null, c.id, media.id)}>
+                    <form action={deletePostComment.bind(null, c.id, post.id)}>
                       <button
                         type="submit"
                         className="shrink-0 text-[11px] text-stone-400 transition hover:text-rose-500"
@@ -187,12 +166,14 @@ export default async function FotoPage({
             </ul>
           )}
 
-          <CommentForm mediaId={media.id} />
+          <PostCommentForm postId={post.id} />
         </section>
 
-        <footer className="mt-8 flex justify-end">
-          <DeletePhotoButton mediaId={media.id} votes={deleteVotes} />
-        </footer>
+        {isAuthor && (
+          <footer className="mt-8 flex justify-end">
+            <PostDeleteButton postId={post.id} />
+          </footer>
+        )}
       </main>
     </div>
   );

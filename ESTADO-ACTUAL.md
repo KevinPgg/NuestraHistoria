@@ -37,18 +37,94 @@ punto de retomada.
 - Música Deezer por foto: buscador (proxy `/api/deezer`, resuelve CORS), preview
   30s, colgar/cambiar/quitar (`music_tracks` + `media_music`). Una canción por foto.
   Barra difuminada dentro de la foto + autoplay en loop.
-- Navegación inferior (TabBar): Inicio (feed) / Pareja / Cartas.
+- Navegación inferior (TabBar): Inicio (feed) / Destacados / Pareja / Cartas.
+  "Destacados" redirige a tu propio perfil (ahí viven ahora las burbujas).
 - Sección Cartas (`/cartas`): hitos que se desbloquean por fecha desde 2025-05-30
   (`lib/milestones.ts`); minijuegos portados a React como gate (6m→tostones,
   12m→memory) antes de leer la carta. Tema Golden Hour.
 - Sección Pareja (`/pareja`): contador de días + acceso a los dos perfiles.
-- Perfil individual (`/perfil/[id]`): avatar circular editable (subir nueva o
-  elegir de tus fotos), stats (publicaciones/likes/comentarios recibidos), y feed
-  propio (grid de tus fotos). Subir foto desde el perfil alimenta el feed compartido.
+- **POSTS (álbumes multi-foto en el PERFIL, estilo Instagram)**. Modelo definitivo:
+  **Inicio (`/feed`) = el POOL** de fotos sueltas (subir/explorar). **El perfil
+  "Mi feed" = los POSTS del usuario** (cada uno álbum de 1..N fotos del pool, con
+  descripción y música). Los posts se crean DESDE el perfil ("Crear post"). Un
+  post con >1 foto muestra el ícono de tarjetas apiladas; abrirlo = carrusel
+  deslizable (flechas + puntos + contador 1/3 + zoom) con su música (autoplay loop).
+  Tablas `posts`+`post_media`; social a nivel POST (`post_likes`/`post_comments`/
+  `post_music`/`post_delete_votes`); `posts.author_id` = dueño del perfil. Stats de
+  perfil = nº de posts + likes/comentarios sobre ellos. Crear post: elegir del pool
+  o subir nueva + descripción + música (Deezer, `MusicPicker`). Borrar post = 2
+  votos, NO borra las fotos del pool. Subir en Inicio = solo agrega al pool (no crea
+  post). Código: `lib/posts.ts` (getFeedPosts/getUserPosts/getPostDetail),
+  `lib/postSocial.ts`, `lib/postMusic.ts`, `app/post/actions.ts` (createPost con
+  música) + `app/post/[id]/actions.ts`, vista `app/post/[id]/page.tsx`, componentes
+  `PostCarousel`, `PostMusicBar`, `MusicPicker`, `CreatePost`, `PostLikeButton`,
+  `PostCommentForm`, `PostDeleteButton`. SQL: `supabase/posts-multifoto.sql`.
+  OBSOLETO tras esto: `profile_media` + `ProfileFeed`/`ProfileFeedEditor` +
+  `lib/profileMedia.ts` (el perfil ya no es selección de fotos sueltas sino posts);
+  quedaron sin uso, se pueden borrar. `/foto/[id]` sigue como visor de una foto del
+  pool (con su social por-foto; secundario). Los ~125 posts auto-creados por la
+  migración anterior con author NULL quedan huérfanos (invisibles); los 3 de Kevin
+  aparecen en su perfil.
+- **Modelo pool → perfil → destacados (estilo Instagram)**: `media` es el POOL
+  compartido (feed). El perfil de cada usuario es una SELECCIÓN curada del pool
+  (tabla `profile_media`, RLS: pareja lee, cada quien edita el suyo), no "lo que
+  subió". Subir una foto (desde el feed, el perfil o Ajustes) la mete al pool Y al
+  perfil de quien sube. Desde el perfil puedes "+ Agregar fotos" (elegir del pool o
+  subir) y "Editar" para quitar. `/feed` ahora tiene botón "Subir foto" visible.
+  Los stats de perfil (publicaciones/likes/comentarios) se cuentan sobre
+  `profile_media`. Código: `lib/profileMedia.ts`, acciones `addToProfile`/
+  `removeFromProfile` en `app/perfil/actions.ts`, `components/ProfileFeed.tsx` +
+  `ProfileFeedEditor.tsx`. SQL: `supabase/perfil-seleccion-pool.sql` (aplicado vía
+  MCP; sembró cada perfil con lo que ese usuario ya había subido).
+- Perfil individual (`/perfil/[id]`): avatar circular editable (elige de cualquier
+  foto del pool o sube una), stats, feed del perfil (selección) y burbujas de
+  destacados. Los selectores de perfil y destacados eligen del pool completo.
+- **Destacados (burbujas tipo "historias destacadas")** en el perfil, arriba del
+  feed propio, independientes por usuario. Reemplazan a las favoritas-estrella
+  (obsoletas: `web/lib/favorites.ts` y `web/components/FavoriteButton.tsx` quedaron
+  inertes, se pueden borrar). Modelo: reusa `momentos` (burbuja: título, portada
+  `cover_media_id`, `orden`) + `momento_media` (fotos). Burbuja "+" (solo en tu
+  perfil) crea uno; el editor deja **elegir fotos existentes o subir nuevas** (las
+  nuevas también entran al feed). Visor del grupo con gestión (agregar, portada,
+  quitar, renombrar, borrar). Código: `lib/highlights.ts`, `app/destacados/actions.ts`,
+  `components/HighlightsBar|HighlightEditor|HighlightViewer.tsx`. SQL:
+  `supabase/destacados-momentos.sql` (ya aplicado en Supabase vía MCP).
+- **Login biométrico (passkey / WebAuthn)** con la API NATIVA de Supabase
+  (experimental, `supabase-js` ≥ 2.105; instalado 2.109). Botón "Entrar con huella
+  / Face ID" en `/login` (`signInWithPasskey`) además de email+contraseña (respaldo).
+  Registro/gestión del dispositivo en `/ajustes` (`components/PasskeyManager.tsx`:
+  `registerPasskey`, `auth.passkey.list/delete`). Flag `experimental.passkey` en
+  `lib/supabase/client.ts`. NO usa la tabla `webauthn_credentials` (Supabase guarda
+  las credenciales). ⚠️ Requiere pasos manuales de Kevin (ver abajo).
+- **PWA instalable** (arregla que el icono abriera una pestaña del navegador):
+  `app/manifest.ts` (display standalone), iconos corazón en `public/icons/`,
+  service worker mínimo `public/sw.js` (SIN caché — las URLs firmadas expiran),
+  registrado por `components/ServiceWorkerRegister.tsx`; metadata PWA/appleWebApp
+  en `app/layout.tsx`.
+
+## ⚠️ Pasos manuales pendientes (Kevin) — para que el biométrico funcione
+1. **Panel de Supabase → Authentication → Passkeys**: activar "Enable Passkey
+   authentication".
+2. **Relying Party**: RP ID = tu DOMINIO de producción SIN esquema/puerto/ruta
+   (ej. `nuestra-historia.vercel.app` o tu dominio propio). RP Origins = el/los
+   origen(es) https (ej. `https://nuestra-historia.vercel.app`). OJO: cambiar el
+   RP ID después INVALIDA las passkeys ya registradas — elígelo estable.
+3. En `localhost` funciona para probar (WebAuthn permite loopback sin https).
+4. Flujo: entra con contraseña → Ajustes → "Registrar este dispositivo" → luego ya
+   puedes usar "Entrar con huella / Face ID".
 - Subida reutilizable: `UploadButton` (modal con `UploadForm`), usable en perfil y ajustes.
 - Foto en tamaño completo (lightbox), barra de música transparente con bordes
   difuminados, y autoplay que re-resuelve el preview de Deezer (arregla canciones
   viejas que no sonaban por URL caducada).
+
+## Plan futuro (marcado explícitamente)
+- **Rediseño del feed / inicio**: hoy muestra todas las imágenes en plano (aburrido).
+  Objetivo: tarjetas deslizables mostrando detalles como si estuvieran seleccionadas
+  (caja de texto funcional, descripción, vista del original). Es rediseño de UX del
+  feed, va en su propio bloque.
+- ~~Biométrico (passkey / WebAuthn)~~ ✅ HECHO (2026-07-19) con la API nativa de
+  Supabase, no SimpleWebAuthn. Ver arriba. Falta solo la config del panel (pasos
+  manuales). La tabla `webauthn_credentials` quedó SIN uso (se puede borrar).
 
 ## Pendiente grande (fases siguientes)
 - **Fase B — Post view**: subir 1 foto / varias (canción global o por foto) / video
