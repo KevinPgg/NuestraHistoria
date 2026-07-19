@@ -1,10 +1,14 @@
 # Dependencias y builds
 node_modules/
-package-lock.json
 dist/
 build/
 tmp/
+.next/
 /imagenesPorAgregar
+/media-webp
+
+# Originales fuera del repo (respaldar en Drive)
+/_originales-backup
 
 # Python
 .venv/

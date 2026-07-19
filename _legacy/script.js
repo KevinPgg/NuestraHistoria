@@ -668,8 +668,38 @@ const formatPhotoBadgeDate = (date) => {
     }).format(date);
 };
 
-// Botón "Mostrar más"
+// Botón "Mostrar más" — se mantiene como fallback accesible (teclado / sin IntersectionObserver)
 loadMoreBtn.addEventListener('click', loadPage);
+
+// ----- Infinite scroll: carga el siguiente lote al hacer scroll -----
+// Usamos IntersectionObserver sobre el centinela (load-more-wrap) en vez de
+// escuchar el evento 'scroll', que dispara decenas de veces por segundo.
+// rootMargin precarga el lote ~300px antes de que el usuario llegue al final.
+const hasMorePages = () => currentPage * PAGE_SIZE < allFilteredCards.length;
+
+if ('IntersectionObserver' in window) {
+    let isLoadingPage = false;
+
+    const infiniteObserver = new IntersectionObserver((entries) => {
+        const entry = entries[0];
+        if (!entry.isIntersecting || isLoadingPage || !hasMorePages()) return;
+
+        isLoadingPage = true;
+        loadPage();
+        isLoadingPage = false;
+
+        // Si el centinela sigue visible (viewport alto), re-observamos para
+        // forzar una nueva comprobación y seguir cargando lotes.
+        if (hasMorePages()) {
+            infiniteObserver.unobserve(loadMoreWrap);
+            requestAnimationFrame(() => infiniteObserver.observe(loadMoreWrap));
+        }
+    }, { rootMargin: '300px 0px' });
+
+    // El centinela siempre existe; cuando 'load-more-wrap' deja de estar oculto
+    // y entra al viewport, el observer dispara la carga automáticamente.
+    infiniteObserver.observe(loadMoreWrap);
+}
 
 // Botón "Momento Random" — elige del pool filtrado actual (Math.random() real, no seeded)
 randomPhotoBtn.addEventListener('click', () => {
