@@ -1,143 +1,51 @@
-# 🛠️ Guía de Contribución — Nuestra Historia
+# 🛠️ Guía de contribución — Nuestra Historia (v2)
 
-Este archivo define las reglas, convenciones y flujo de trabajo para mantener el proyecto organizado.
+Reglas y flujo de trabajo de la app Next.js + Supabase. Para la v1 estática ver `HISTORICO.md`.
 
----
+## Flujo de trabajo
+- Trabajo **local**. **Kevin hace todos los commits** tras revisar `git diff`. Nadie
+  más commitea por él (incluidas herramientas/IA).
+- Ramas de trabajo por feature: `feat/foto-individual`, `feat/likes-comentarios`,
+  `fix/...`. `main` es la rama estable.
 
-## 📐 Convenciones de nombres
-
-### Imágenes (`img/`)
-
-| Tipo | Formato | Ejemplo |
-|---|---|---|
-| Solo Ale | `ale-[descripcion].jpg` | `ale-cumpleaños.jpg` |
-| Solo Kevin | `yo-[descripcion].jpg` | `yo-gym-octubre.jpg` |
-| Ambos | `aleyo-[descripcion].jpg` | `aleyo-portones.jpg` |
-| Solo comida/lugar | `[lugar]-[descripcion].jpg` | `casares-cena.jpg` |
-
-**Reglas:**
-- Todo en **minúsculas**
-- Usa **guiones** `-` en vez de espacios o guiones bajos
-- Sin caracteres especiales: ñ, á, é → `n`, `a`, `e`
-- Extensión: preferir `.jpg` (menor peso). `.png` solo si hay transparencia
-- Máximo ~2MB por imagen (comprimir con [Squoosh](https://squoosh.app) si es necesario)
-
----
-
-## 🌿 Flujo de ramas (Git)
-
+## Formato de commits
 ```
-main          ← producción (lo que se ve en GitHub Pages)
-  └── feat/fotos-diciembre    ← ramas de trabajo
-  └── feat/carta-aniversario
-  └── fix/fecha-incorrecta
+feat: vista de foto individual
+fix: policy de escritura en likes
+docs: actualizo ESTADO-ACTUAL con cola de features
+chore: reorganizo repo, archivo v1 en _legacy/
 ```
 
-**Antes de hacer push a `main`, verificar:**
-- [ ] El sitio carga bien en `localhost:8080`
-- [ ] No hay errores en la consola del navegador
-- [ ] `photoDates.json` está actualizado si agregaste fotos nuevas
-- [ ] Las imágenes no superan 2MB cada una
+## Storage (regla dura)
+- **Todo acceso a imágenes pasa por `web/lib/storage`.** Nunca llamar al SDK de
+  Supabase Storage directo desde componentes.
+- `media.storage_path` / `thumb_path` guardan **claves relativas** (`fotos/x.webp`),
+  **nunca URLs**. Esto mantiene la portabilidad a Cloudflare R2 sin migrar la BD.
+- Las URLs firmadas se generan al vuelo, en lote, desde el adaptador.
 
----
+## Supabase / RLS (regla dura)
+- Cada tabla o recurso nuevo necesita su **policy RLS**. Crear la fila o subir el
+  archivo NO da acceso por sí solo.
+- Al depurar, usar el **MCP de Supabase** (project_id `lssgeeixxqcdbhidsxes`) para
+  ejecutar SQL y leer logs, en vez de adivinar.
+- Regla de privacidad: solo los 2 correos en whitelist tienen sesión. `momentos`
+  con `visibilidad='private'` se ven solo para su `owner_id`.
 
-## 💬 Formato de commits
+## Música
+- Deezer (Spotify deprecó `preview_url` en nov-2024). Endpoint público
+  `GET https://api.deezer.com/search?q=` → campo `preview` (.mp3 30s). Cache en
+  `music_tracks`, enlace a foto vía `media_music`.
 
-Usa prefijos para mantener el historial legible:
+## Fechas
+- La fecha mostrada de una foto = la más antigua entre creación y modificación
+  (`pickOldestDate`). Se preservó desde la v1 (`supabase/migrate.mjs`).
 
-```
-feat: agrego fotos de diciembre 2025
-fix: corrijo fecha de aleyo-portones.jpg
-style: mejoro animación del modal
-docs: actualizo README con nueva sección
-```
+## Originales
+- Los JPG originales NO van al repo. Viven en `_originales-backup/` (gitignored);
+  respaldar en Drive y borrar del disco. La app sirve WebP desde el bucket privado.
 
----
-
-## 🔒 Privacidad de las imágenes
-
-Las fotos son privadas. Tienes dos opciones:
-
-### Opción A — Repo público sin fotos (recomendada)
-- Agrega `img/` al `.gitignore`
-- Sube las fotos directamente desde GitHub Pages (drag & drop en la UI)
-- O usa un CDN privado como Cloudinary (free tier: 25GB)
-
-### Opción B — Repo privado
-- Convierte el repositorio en **privado** en GitHub Settings
-- GitHub Pages **sí funciona** en repos privados con cuenta gratuita
-
-> Actualmente el repo parece público. Evalúa si quieres mantenerlo así con fotos personales.
-
----
-
-## 🗓️ Reglas para fechas
-
-1. **Siempre usa ISO 8601** con zona horaria:
-   ```
-   2025-10-19T18:48:50.000000+00:00
-   ```
-2. Si no sabes la hora exacta, usa mediodía UTC: `2025-10-19T12:00:00+00:00`
-3. Si la fecha del archivo no coincide con la foto real → agrégala a `scripts/dateOverrides.json`
-4. **Nunca uses** fechas del futuro
-
----
-
-## 🖼️ Agregar un grupo de fotos (flujo completo)
-
-```bash
-# 1. Crea una rama nueva
-git checkout -b feat/fotos-navidad
-
-# 2. Copia las fotos
-cp ~/fotos/*.jpg img/
-
-# 3. Extrae metadata
-cd scripts && python extract_metadata.py && cd ..
-
-# 4. Revisa el reporte — edita dateOverrides.json si hay fotos marcadas
-cat scripts/dateOverrides.json
-
-# 5. Agrega las entradas en base/cardRegistros.js
-
-# 6. Prueba localmente
-python -m http.server 8080
-
-# 7. Commit y push
-git add .
-git commit -m "feat: fotos navidad 2025"
-git push origin feat/fotos-navidad
-
-# 8. Merge a main (desde GitHub o localmente)
-git checkout main && git merge feat/fotos-navidad && git push
-```
-
----
-
-## 🧩 Arquitectura del código (resumen)
-
-```
-script.js
-  ├── Configuración: startDate, milestones[]
-  ├── Timeline: genera tarjetas de hitos y calcula si están desbloqueadas
-  ├── Galería: carga cards, shuffle seeded, renderiza grid
-  ├── Filtros: día / semana / mes / año
-  ├── Modales: carta (letter-modal) y foto (photo-modal)
-  └── Efectos: emojis cayendo (createFallingElements)
-
-base/cardRegistros.js
-  ├── photoData[]     ← datos estáticos (filename, descripcion)
-  └── loadCardRegistros() ← combina photoData + photoDates.json → Card[]
-
-model/card.js
-  └── class Card     ← id, fotoFileName, descripcion, fecha
-```
-
----
-
-## ❌ Lo que NO hacer
-
-- No editar `photoDates.json` a mano (es generado por el script)
-- No poner el texto de las cartas directamente en el HTML
-- No usar `var` ni código legacy — el proyecto usa ES Modules modernos
-- No subir imágenes sin comprimir de más de 5MB
+## Lo que NO hacer
+- No commitear `.env.local` ni claves.
+- No versionar imágenes originales ni `node_modules/`.
+- No acceder a Storage sin pasar por `web/lib/storage`.
+- No crear tablas/recursos en Supabase sin su policy RLS.

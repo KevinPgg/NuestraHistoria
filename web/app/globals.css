@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+  Aquí puedes pegar / importar tu style.css legado para conservar la estética
+  que ya construiste, e ir migrando gradualmente a utilidades de Tailwind
+  conforme rediseñas hacia la estética de red social.
+
+  Estrategia recomendada:
+  - Tailwind para lo nuevo (feed, tarjetas, likes, comentarios).
+  - Tu CSS para componentes existentes que aún no rediseñas.
+*/
+
+:root {
+  --color-fondo: #0f0f12;
+  --color-texto: #f5f5f7;
+}
+
+body {
+  background: var(--color-fondo);
+  color: var(--color-texto);
+}
